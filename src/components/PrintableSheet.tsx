@@ -294,8 +294,46 @@ export const PrintableSheet: React.FC<PrintableSheetProps> = ({ overrideKelas, o
   const labelRight = isMapelFormat ? "Guru Mata Pelajaran," : (isMurid ? "Guru/ Wali Kelas," : "Kepala Sekolah,");
   const displayNamaLeft = ctx.kepsek || '';
   const displayNIPLeft = ctx.nip || '';
-  const displayNamaRight = isMurid ? (ctx.wali || '') : (ctx.kepsek || '');
-  const displayNIPRight = isMurid ? (ctx.nipWali || '') : (ctx.nip || '');
+
+  let derivedWaliName = ctx.wali || '......................';
+  let derivedWaliNIP = ctx.nipWali || '......................';
+
+  if (isMurid) {
+    if (ctx.subModeMurid === 'kelas') {
+      const matchedGuru = ctx.staffData.find(staff => {
+        const jab = staff.jabatan?.primary;
+        if (jab?.cat === 'Guru Kelas' && jab?.sub === ctx.kelas) {
+          if (ctx.rombel && ctx.rombel !== 'Hanya Satu') {
+            return staff.jabatan?.rombel === ctx.rombel;
+          }
+          return true;
+        }
+        return false;
+      });
+      if (matchedGuru) {
+        derivedWaliName = matchedGuru.nama || '......................';
+        derivedWaliNIP = matchedGuru.nip || '......................';
+      } else {
+        derivedWaliName = '......................';
+        derivedWaliNIP = '......................';
+      }
+    } else if (ctx.subModeMurid === 'mapel') {
+      const matchedGuru = ctx.staffData.find(staff => {
+        const jab = staff.jabatan?.primary;
+        return jab?.cat === 'Guru Mapel' && jab?.sub === ctx.namaMapel;
+      });
+      if (matchedGuru) {
+        derivedWaliName = matchedGuru.nama || '......................';
+        derivedWaliNIP = matchedGuru.nip || '......................';
+      } else {
+        derivedWaliName = '......................';
+        derivedWaliNIP = '......................';
+      }
+    }
+  }
+
+  const displayNamaRight = isMurid ? derivedWaliName : (ctx.kepsek || '');
+  const displayNIPRight = isMurid ? derivedWaliNIP : (ctx.nip || '');
   const tglText = ctx.tglManual || (isMapelFormat ? "......................" : `${new Date(thn, bIdx + 1, 0).getDate()} ${bName} ${thn}`);
   const displayTglTtd = ctx.kota ? `${ctx.kota}, ${tglText}` : tglText;
 
