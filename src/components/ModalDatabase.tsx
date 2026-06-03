@@ -314,23 +314,23 @@ export const ModalDatabase: React.FC<ModalProps> = ({ isOpen, onClose, target })
                       onDragEnd={handleDragEnd}
                       className={`border-b border-slate-100 last:border-b-0 transition-colors ${selectedRows.has(idx) ? 'bg-blue-50/50' : 'hover:bg-slate-50/50'} ${draggedIdx === idx ? 'opacity-50' : ''}`}
                   >
-                    <td className="p-1 border-r border-slate-200 text-center text-slate-400">
+                    <td className="p-3 border-r border-slate-200 text-center text-slate-400 align-middle">
                       <input type="checkbox" className="w-3.5 h-3.5 cursor-pointer" checked={selectedRows.has(idx)} onChange={() => toggleRowChecked(idx)} />
                     </td>
-                    <td className="p-1 border-r border-slate-200 text-center text-slate-300 hover:text-slate-500 cursor-grab active:cursor-grabbing align-middle">
+                    <td className="p-3 border-r border-slate-200 text-center text-slate-300 hover:text-slate-500 cursor-grab active:cursor-grabbing align-middle">
                       <GripVertical size={16} className="mx-auto" />
                     </td>
-                    <td className="p-1 border-r border-slate-200 text-center text-sm text-slate-400">{idx + 1}</td>
-                    <td className="p-1 border-r border-slate-200"><input type="text" className="!text-left w-full bg-transparent p-2 text-sm outline-none transition-colors hover:bg-white focus:bg-white border border-transparent focus:border-blue-300 rounded" value={item.nama} onChange={e => updateStudent(idx, 'nama', e.target.value)} /></td>
-                    <td className="p-1 border-r border-slate-200"><input type="text" className="w-full bg-transparent p-2 text-sm text-center outline-none transition-colors hover:bg-white focus:bg-white border border-transparent focus:border-blue-300 rounded" value={item.lp} maxLength={1} onChange={e => updateStudent(idx, 'lp', e.target.value)} /></td>
-                    <td className="p-1 border-r border-slate-200 text-center">
-                      <select className="w-full bg-transparent p-2 text-sm outline-none transition-colors hover:bg-white focus:bg-white border border-transparent rounded" value={item.kelas} onChange={e => updateStudent(idx, 'kelas', e.target.value)}>
+                    <td className="p-3 border-r border-slate-200 text-center text-sm text-slate-400 align-middle">{idx + 1}</td>
+                    <td className="p-3 border-r border-slate-200"><input type="text" className="!text-left w-full border border-slate-200 rounded p-1.5 text-sm outline-none focus:ring-1 focus:ring-blue-500 bg-transparent transition-colors hover:bg-white focus:bg-white" value={item.nama} placeholder="Nama Siswa" onChange={e => updateStudent(idx, 'nama', e.target.value)} /></td>
+                    <td className="p-3 border-r border-slate-200"><input type="text" className="w-full border border-slate-200 rounded p-1.5 text-sm text-center outline-none focus:ring-1 focus:ring-blue-500 bg-transparent transition-colors hover:bg-white focus:bg-white uppercase" value={item.lp} placeholder="L/P" maxLength={1} onChange={e => updateStudent(idx, 'lp', e.target.value)} /></td>
+                    <td className="p-3 border-r border-slate-200 text-center">
+                      <select className="w-full bg-transparent p-1.5 text-sm outline-none border border-slate-200 rounded focus:ring-1 focus:ring-blue-500 transition-colors hover:bg-white focus:bg-white" value={item.kelas} onChange={e => updateStudent(idx, 'kelas', e.target.value)}>
                         <option value="">-</option>
                         {kelasOptions.map(o => <option key={o} value={o}>{o}</option>)}
                       </select>
                     </td>
-                    <td className="p-1 border-r border-slate-200 text-center">
-                      <select className="w-full bg-transparent p-2 text-sm outline-none transition-colors hover:bg-white focus:bg-white border border-transparent rounded" value={item.rombel} onChange={e => updateStudent(idx, 'rombel', e.target.value)}>
+                    <td className="p-3 border-r border-slate-200 text-center">
+                      <select className="w-full bg-transparent p-1.5 text-sm outline-none border border-slate-200 rounded focus:ring-1 focus:ring-blue-500 transition-colors hover:bg-white focus:bg-white" value={item.rombel} onChange={e => updateStudent(idx, 'rombel', e.target.value)}>
                         <option value="">-</option>
                         {rombelOptions.map(o => <option key={o} value={o}>{o}</option>)}
                       </select>

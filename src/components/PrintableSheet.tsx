@@ -301,14 +301,20 @@ export const PrintableSheet: React.FC<PrintableSheetProps> = ({ overrideKelas, o
   if (isMurid) {
     if (ctx.subModeMurid === 'kelas') {
       const matchedGuru = ctx.staffData.find(staff => {
-        const jab = staff.jabatan?.primary;
-        if (jab?.cat === 'Guru Kelas' && jab?.kls?.includes(ctx.kelas)) {
-          if (ctx.rombel && ctx.rombel !== 'Hanya Satu') {
-            return jab?.rombel === ctx.rombel;
+        const p = staff.jabatan?.primary;
+        const s = staff.jabatan?.secondary;
+        
+        const isMatch = (jab: any) => {
+          if (jab?.cat === 'Guru Kelas' && (jab?.kls || []).includes(ctx.kelas)) {
+            if (ctx.rombel && ctx.rombel !== 'Hanya Satu') {
+              return jab?.rombel === ctx.rombel || (jab?.sub && jab.sub.includes(ctx.rombel));
+            }
+            return true;
           }
-          return true;
-        }
-        return false;
+          return false;
+        };
+
+        return isMatch(p) || (s?.active && isMatch(s));
       });
       if (matchedGuru) {
         derivedWaliName = matchedGuru.nama || '......................';
@@ -319,8 +325,12 @@ export const PrintableSheet: React.FC<PrintableSheetProps> = ({ overrideKelas, o
       }
     } else if (ctx.subModeMurid === 'mapel') {
       const matchedGuru = ctx.staffData.find(staff => {
-        const jab = staff.jabatan?.primary;
-        return jab?.cat === 'Guru Mapel' && jab?.sub === ctx.namaMapel;
+        const p = staff.jabatan?.primary;
+        const s = staff.jabatan?.secondary;
+        const isMatch = (jab: any) => {
+          return jab?.cat === 'Guru Mapel' && jab?.sub === ctx.namaMapel;
+        };
+        return isMatch(p) || (s?.active && isMatch(s));
       });
       if (matchedGuru) {
         derivedWaliName = matchedGuru.nama || '......................';
