@@ -148,6 +148,11 @@ th, td {
   padding-left: 6px !important;
 }
 
+.pegawai-mode td:nth-child(3) {
+  text-align: left !important;
+  padding-left: 6px !important;
+}
+
 .holiday { background-color: #f3f4f6 !important; }
 .sunday { background-color: #fee2e2 !important; }
 
