@@ -35,7 +35,7 @@ export const Topbar: React.FC<TopbarProps> = ({ onOpenModal, onOpenDataModal, on
     reader.onload = (e) => {
       try {
         const data = JSON.parse(e.target?.result as string);
-        ctx.restoreState(data);
+        ctx.restoreState({ ...data, npsn: ctx.npsn });
       } catch (err) {
         alert("File backup tidak valid!");
       }
