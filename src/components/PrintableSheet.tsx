@@ -305,9 +305,22 @@ export const PrintableSheet: React.FC<PrintableSheetProps> = ({ overrideKelas, o
         const s = staff.jabatan?.secondary;
         
         const isMatch = (jab: any) => {
-          if (jab?.cat === 'Guru Kelas' && (jab?.kls || []).includes(ctx.kelas)) {
+          if (jab?.cat !== 'Guru Kelas') return false;
+          
+          let klsMatch = false;
+          if (Array.isArray(jab?.kls) && jab.kls.length > 0) {
+            klsMatch = jab.kls.includes(ctx.kelas);
+          } else if (typeof jab?.sub === 'string' && ctx.kelas) {
+            const regex = new RegExp(`\\b${ctx.kelas}\\b`);
+            klsMatch = jab.sub === ctx.kelas || jab.sub === `Kelas ${ctx.kelas}` || regex.test(jab.sub);
+          } else {
+             // Fallback if neither exists
+             klsMatch = false;
+          }
+
+          if (klsMatch) {
             if (ctx.rombel && ctx.rombel !== 'Hanya Satu') {
-              return jab?.rombel === ctx.rombel || (jab?.sub && jab.sub.includes(ctx.rombel));
+              return jab?.rombel === ctx.rombel || (typeof jab?.sub === 'string' && jab.sub.includes(ctx.rombel));
             }
             return true;
           }
