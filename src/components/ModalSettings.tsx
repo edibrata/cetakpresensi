@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { X, Save, Upload, Download, Plus, Trash2, Calendar, User, Users, Book, CheckCircle, Search, Loader2 } from 'lucide-react';
+import { X, Save, Upload, Download, Plus, Trash2, Calendar, User, Users, Book, CheckCircle, Search, Loader2, Cloud, Building2 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useAppContext } from '../context/AppContext';
 import { Staff, Student, Holiday, kelasOptions, rombelOptions, bNames } from '../types';
@@ -36,7 +36,7 @@ export const ModalSettings: React.FC<ModalProps> = ({ isOpen, onClose }) => {
       
       if (result.exists && result.data) {
         setCloudStatus('found');
-        setStatusMessage('Data ditemukan! Memuat data...');
+        setStatusMessage('Data tersinkronisasi.');
         
         const d = result.data;
         if (d.sekolah) ctx.setField('sekolah', d.sekolah);
@@ -52,7 +52,7 @@ export const ModalSettings: React.FC<ModalProps> = ({ isOpen, onClose }) => {
         
       } else {
         setCloudStatus('new');
-        setStatusMessage('NPSN baru, siap digunakan untuk penyimpanan awan.');
+        setStatusMessage('NPSN baru siap digunakan.');
       }
     } catch (e) {
       setCloudStatus('idle');
@@ -67,110 +67,140 @@ export const ModalSettings: React.FC<ModalProps> = ({ isOpen, onClose }) => {
       initial={{ opacity: 0 }} 
       animate={{ opacity: 1 }} 
       exit={{ opacity: 0 }} 
-      transition={{ duration: 0.2 }}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4" 
+      transition={{ duration: 0.15 }}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4" 
       onClick={onClose}
     >
       <motion.div 
-        initial={{ scale: 0.95, opacity: 0 }} 
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.95, opacity: 0 }}
-        transition={{ duration: 0.2 }}
-        className="bg-white rounded-lg border border-slate-200 shadow-sm w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col font-sans text-slate-800" 
+        initial={{ scale: 0.97, opacity: 0, y: 10 }} 
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        exit={{ scale: 0.97, opacity: 0, y: 10 }}
+        transition={{ duration: 0.15 }}
+        className="bg-slate-50 rounded-xl border border-slate-200 shadow-xl w-full max-w-3xl max-h-[90vh] flex flex-col font-sans overflow-hidden" 
         onClick={e => e.stopPropagation()}
       >
-        <div className="px-5 py-4 border-b border-slate-200 flex justify-between items-center bg-white">
+        {/* Header */}
+        <div className="px-5 py-4 border-b border-slate-200 bg-white flex justify-between items-center z-10 shrink-0">
           <div>
-            <h3 className="text-lg font-semibold tracking-tight text-slate-800">Pengaturan Identitas & Awan</h3>
-            <p className="text-slate-500 text-xs mt-1 font-normal">Konfigurasi NPSN, Nama Sekolah dan Pejabat Penandatangan</p>
+            <h3 className="text-base font-semibold text-slate-800">Pengaturan Identitas & Awan</h3>
+            <p className="text-slate-500 text-[11px] mt-0.5">Konfigurasi data instansi dan sinkronisasi awan</p>
           </div>
-          <button onClick={onClose} className="p-1.5 hover:bg-slate-100 rounded-md transition-all text-slate-500 active:scale-95">
-            <X size={20} />
+          <button onClick={onClose} className="p-1.5 hover:bg-slate-100 rounded-md transition-colors text-slate-400 hover:text-slate-600">
+            <X size={18} />
           </button>
         </div>
-        <div className="p-8 space-y-8 overflow-y-auto bg-white">
+
+        {/* Content */}
+        <div className="p-5 overflow-y-auto space-y-5 custom-scrollbar">
           
-          <div className="bg-blue-50 border border-blue-100 p-4 rounded-lg flex flex-col gap-3 transition-colors hover:border-blue-200">
-            <div className="flex gap-2 items-center">
-              <div className="flex-1 space-y-1">
-                <label className="block text-[11px] font-semibold text-blue-800 uppercase ml-1">NPSN (Nomor Pokok Sekolah Nasional)</label>
-                <div className="flex gap-2">
-                  <input type="text" value={npsnInput} onChange={e => setNpsnInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleCheckNPSN()} className="w-full outline-none focus:ring-2 focus:ring-blue-500 transition-all border border-blue-200 p-2.5 rounded-md text-sm bg-white" placeholder="Masukkan NPSN untuk sinkronisasi awan" />
-                  <button onClick={handleCheckNPSN} disabled={cloudStatus === 'loading' || !npsnInput.trim()} className="px-4 py-2 bg-blue-600 text-white rounded-md font-medium text-sm hover:bg-blue-700 active:scale-95 transition-all flex items-center gap-2 disabled:opacity-50 disabled:active:scale-100">
-                    {cloudStatus === 'loading' ? <Loader2 size={16} className="animate-spin" /> : <Search size={16} />}
-                    Cek NPSN
-                  </button>
-                </div>
-              </div>
+          {/* Cloud Sync */}
+          <div className="bg-white border border-slate-200 p-4 rounded-xl shadow-sm flex items-start gap-4">
+            <div className="p-2.5 bg-blue-50 text-blue-600 rounded-lg shrink-0 mt-0.5 border border-blue-100">
+              <Cloud size={20} />
             </div>
-            {statusMessage && (
-              <div className={`text-xs font-medium flex items-center gap-1.5 ${cloudStatus === 'found' ? 'text-emerald-600' : cloudStatus === 'new' ? 'text-blue-600' : 'text-slate-600'}`}>
-                {cloudStatus === 'found' && <CheckCircle size={14} />}
-                {statusMessage}
+            <div className="flex-1 space-y-3">
+              <div>
+                <h4 className="text-sm font-semibold text-slate-800">Sinkronisasi Awan (Firestore)</h4>
+                <p className="text-[11px] text-slate-500 mt-0.5 leading-relaxed">
+                  Masukkan NPSN sekolah Anda. Jika data sudah ada di awan, sistem akan otomatis memuatnya. Jika belum, NPSN akan menjadi kunci baru untuk penyimpanan Anda.
+                </p>
               </div>
-            )}
-            <p className="text-[10px] text-blue-600/70 leading-relaxed max-w-2xl">
-              NPSN akan menjadi Anchor (kunci utama) penyimpanan awan Anda di Firebase Firestore. Saat Anda menginput NPSN yang sudah pernah tersimpan, data master (Sekolah, Pegawai, Murid, Hari Libur) akan otomatis dimuat.
-            </p>
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <input 
+                    type="text" 
+                    value={npsnInput} 
+                    onChange={e => setNpsnInput(e.target.value)} 
+                    onKeyDown={e => e.key === 'Enter' && handleCheckNPSN()} 
+                    className="w-full pl-9 pr-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium text-slate-700" 
+                    placeholder="Masukkan NPSN" 
+                  />
+                  <Building2 size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                </div>
+                <button 
+                  onClick={handleCheckNPSN} 
+                  disabled={cloudStatus === 'loading' || !npsnInput.trim()} 
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium text-sm hover:bg-blue-700 active:scale-[0.98] transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm border border-blue-700/50"
+                >
+                  {cloudStatus === 'loading' ? <Loader2 size={15} className="animate-spin" /> : <Search size={15} />}
+                  <span className="hidden sm:inline">Cek Data</span>
+                </button>
+              </div>
+              {statusMessage && (
+                <p className={`text-xs font-medium flex items-center gap-1.5 ${cloudStatus === 'found' ? 'text-emerald-600' : cloudStatus === 'new' ? 'text-blue-600' : 'text-slate-600'}`}>
+                  {cloudStatus === 'found' && <CheckCircle size={14} />}
+                  {statusMessage}
+                </p>
+              )}
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="p-1.5 bg-slate-100 text-slate-600 border border-slate-200 rounded-md"><Book size={18} /></div>
-                <span className="font-semibold text-slate-800 text-sm tracking-wide">Data Sekolah & Dokumen</span>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {/* Institusi */}
+            <div className="bg-white border border-slate-200 p-4 rounded-xl shadow-sm space-y-4">
+              <h4 className="text-sm font-semibold text-slate-800 border-b border-slate-100 pb-2 mb-1 flex items-center gap-2">
+                <Book size={15} className="text-slate-400" /> Data Institusi
+              </h4>
+              <div className="space-y-1.5">
+                <label className="block text-[11px] font-medium text-slate-500">Nama Satuan Pendidikan</label>
+                <input type="text" value={ctx.sekolah} onChange={e => ctx.setField('sekolah', e.target.value)} className="w-full text-sm bg-slate-50 border border-slate-200 rounded-md py-1.5 px-3 outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all" placeholder="SDN PERDANA 1" />
               </div>
-              <div className="space-y-1">
-                <label className="block text-[11px] font-semibold text-slate-500 uppercase ml-1">Nama Satuan Pendidikan</label>
-                <input type="text" value={ctx.sekolah} onChange={e => ctx.setField('sekolah', e.target.value)} className="w-full outline-none focus:ring-2 focus:ring-blue-500 transition-all border border-slate-200 p-2.5 rounded-md text-sm bg-white" placeholder="SDN PERDANA 1" />
-              </div>
-              <div className="space-y-1">
-                <label className="block text-[11px] font-semibold text-slate-500 uppercase ml-1">Kota/Lokasi TTD</label>
-                <input type="text" value={ctx.kota} onChange={e => ctx.setField('kota', e.target.value)} className="w-full outline-none focus:ring-2 focus:ring-blue-500 transition-all border border-slate-200 p-2.5 rounded-md text-sm bg-white" placeholder="Jakarta" />
-              </div>
-              <div className="space-y-1">
-                <label className="block text-[11px] font-semibold text-slate-500 uppercase ml-1">Tanggal Dokumen (Teks Saja)</label>
-                <input type="text" value={ctx.tglManual} onChange={e => ctx.setField('tglManual', e.target.value)} className="w-full outline-none focus:ring-2 focus:ring-blue-500 transition-all border border-slate-200 p-2.5 rounded-md text-sm bg-white" placeholder="Contoh: 31 Januari 2024" />
-                <p className="text-[11px] text-slate-400 mt-1 italic">* Lokasi akan ditambahkan otomatis dari isian "Kota/Lokasi TTD".</p>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <label className="block text-[11px] font-medium text-slate-500">Kota / Lokasi</label>
+                  <input type="text" value={ctx.kota} onChange={e => ctx.setField('kota', e.target.value)} className="w-full text-sm bg-slate-50 border border-slate-200 rounded-md py-1.5 px-3 outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all" placeholder="Jakarta" />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="block text-[11px] font-medium text-slate-500">Tanggal Cetak</label>
+                  <input type="text" value={ctx.tglManual} onChange={e => ctx.setField('tglManual', e.target.value)} className="w-full text-sm bg-slate-50 border border-slate-200 rounded-md py-1.5 px-3 outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all" placeholder="Contoh: 31 Jan 2024" />
+                </div>
               </div>
             </div>
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="p-1.5 bg-slate-100 text-slate-600 border border-slate-200 rounded-md"><User size={18} /></div>
-                <span className="font-semibold text-slate-800 text-sm tracking-wide">Kepala Sekolah (Auto/Editable)</span>
+
+            <div className="space-y-5">
+              {/* Kepala Sekolah */}
+              <div className="bg-white border border-slate-200 p-4 rounded-xl shadow-sm space-y-4">
+                <h4 className="text-sm font-semibold text-slate-800 border-b border-slate-100 pb-2 mb-1 flex items-center gap-2">
+                  <User size={15} className="text-slate-400" /> Kepala Sekolah
+                </h4>
+                <div className="space-y-3">
+                  <div className="space-y-1.5">
+                    <label className="block text-[11px] font-medium text-slate-500">Nama Lengkap & Gelar</label>
+                    <input type="text" value={ctx.kepsek} onChange={e => ctx.setField('kepsek', e.target.value)} className="w-full text-sm bg-slate-50 border border-slate-200 rounded-md py-1.5 px-3 outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all" placeholder="Nama Kepala Sekolah" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="block text-[11px] font-medium text-slate-500">NIP</label>
+                    <input type="text" value={ctx.nip} onChange={e => ctx.setField('nip', e.target.value)} className="w-full text-sm bg-slate-50 border border-slate-200 rounded-md py-1.5 px-3 outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all" placeholder="198001012010011001" />
+                  </div>
+                </div>
               </div>
-              <div className="space-y-1">
-                <label className="block text-[11px] font-semibold text-slate-500 uppercase ml-1">Nama Lengkap & Gelar</label>
-                <input type="text" value={ctx.kepsek} onChange={e => ctx.setField('kepsek', e.target.value)} className="w-full outline-none focus:ring-2 focus:ring-blue-500 transition-all border border-slate-200 p-2.5 rounded-md text-sm bg-white" placeholder="Nama Kepala Sekolah" />
-              </div>
-              <div className="space-y-1">
-                <label className="block text-[11px] font-semibold text-slate-500 uppercase ml-1">NIP Kepala Sekolah</label>
-                <input type="text" value={ctx.nip} onChange={e => ctx.setField('nip', e.target.value)} className="w-full outline-none focus:ring-2 focus:ring-blue-500 transition-all border border-slate-200 p-2.5 rounded-md text-sm bg-white" placeholder="NIP" />
-              </div>
+
+              {/* Wali Kelas */}
+              {ctx.mode === 'murid' && (
+                <div className="bg-white border border-slate-200 p-4 rounded-xl shadow-sm space-y-4">
+                  <h4 className="text-sm font-semibold text-slate-800 border-b border-slate-100 pb-2 mb-1 flex items-center gap-2">
+                    <Users size={15} className="text-slate-400" /> Guru / Wali Kelas
+                  </h4>
+                  <div className="space-y-3">
+                    <div className="space-y-1.5">
+                      <label className="block text-[11px] font-medium text-slate-500">Nama Lengkap & Gelar</label>
+                      <input type="text" value={ctx.wali} onChange={e => ctx.setField('wali', e.target.value)} className="w-full text-sm bg-slate-50 border border-slate-200 rounded-md py-1.5 px-3 outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all" placeholder="Nama Guru" />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="block text-[11px] font-medium text-slate-500">NIP</label>
+                      <input type="text" value={ctx.nipWali} onChange={e => ctx.setField('nipWali', e.target.value)} className="w-full text-sm bg-slate-50 border border-slate-200 rounded-md py-1.5 px-3 outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all" placeholder="199001012015011001" />
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
-          {ctx.mode === 'murid' && (
-            <div className="p-6 bg-slate-50 rounded-lg border border-slate-200 space-y-4">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="p-1.5 bg-white text-slate-600 border border-slate-200 rounded-md"><Users size={18} /></div>
-                <span className="font-semibold text-slate-800 text-sm tracking-wide">Guru / Wali Kelas (Auto/Editable)</span>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <label className="block text-[11px] font-semibold text-slate-500 uppercase ml-1">Nama Guru/Wali Kelas</label>
-                  <input type="text" value={ctx.wali} onChange={e => ctx.setField('wali', e.target.value)} className="w-full outline-none focus:ring-2 focus:ring-blue-500 transition-all border border-slate-200 p-2.5 rounded-md text-sm bg-white" placeholder="Nama Guru" />
-                </div>
-                <div className="space-y-1">
-                  <label className="block text-[11px] font-semibold text-slate-500 uppercase ml-1">NIP Guru/Wali Kelas</label>
-                  <input type="text" value={ctx.nipWali} onChange={e => ctx.setField('nipWali', e.target.value)} className="w-full outline-none focus:ring-2 focus:ring-blue-500 transition-all border border-slate-200 p-2.5 rounded-md text-sm bg-white" placeholder="NIP Guru" />
-                </div>
-              </div>
-            </div>
-          )}
         </div>
-        <div className="px-5 py-4 border-t border-slate-200 flex gap-3 bg-white">
-          <button onClick={onClose} className="flex-1 py-2 bg-blue-500 text-white rounded-md font-medium text-sm hover:bg-blue-600 active:bg-blue-700 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
-            <Save size={16} /> Simpan & Tutup
+
+        {/* Footer */}
+        <div className="px-5 py-4 border-t border-slate-200 bg-white flex justify-end shrink-0">
+          <button onClick={onClose} className="px-6 py-2 bg-slate-900 text-white rounded-lg font-medium text-sm hover:bg-slate-800 active:scale-[0.98] transition-all flex items-center gap-2 shadow-sm">
+            <Save size={15} /> Simpan Info
           </button>
         </div>
       </motion.div>
