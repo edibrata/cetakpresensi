@@ -83,21 +83,12 @@ const AppContent = () => {
   };
 
   const handleBulkPrint = () => {
-    setIsBulkPrinting(true);
-    setTimeout(() => {
-      window.print();
-    }, 500);
-  };
-
-  const renderBulkPages = () => {
-    if (!isBulkPrinting) return null;
-    
     const targets: any[] = [];
     if (ctx.mode === 'murid') {
       const seen = new Set();
       // Collect from students
       ctx.studentData.forEach(s => {
-        if (s.kelas && s.rombel && s.kelas !== 'Semua Kelas') {
+        if (s.kelas && s.rombel) {
           const key = `${s.kelas}|${s.rombel}`;
           if (!seen.has(key)) {
             seen.add(key);
@@ -110,7 +101,57 @@ const AppContent = () => {
         const checkRole = (jab: any) => {
           if (jab?.cat === 'Guru Kelas' && Array.isArray(jab?.kls)) {
              jab.kls.forEach((k: string) => {
-                if (k && k !== 'Semua Kelas') {
+                if (k) {
+                  const romb = jab.rombel || 'Hanya Satu';
+                  const key = `${k}|${romb}`;
+                  if (!seen.has(key)) {
+                    seen.add(key);
+                    targets.push({ kelas: k, rombel: romb });
+                  }
+                }
+             });
+          }
+        };
+        checkRole(staff.jabatan?.primary);
+        if (staff.jabatan?.secondary?.active) checkRole(staff.jabatan?.secondary);
+      });
+    } else {
+      for (let i = 0; i < 12; i++) targets.push({ bulan: i });
+    }
+
+    if (targets.length === 0) {
+      alert(ctx.mode === 'murid' ? "Tidak ada data kelas/rombel yang valid di database untuk dicetak masal." : "Tidak ada target bulan untuk dicetak massal.");
+      return;
+    }
+
+    setIsBulkPrinting(true);
+    setTimeout(() => {
+      window.print();
+    }, 1000);
+  };
+
+  const renderBulkPages = () => {
+    if (!isBulkPrinting) return null;
+    
+    const targets: any[] = [];
+    if (ctx.mode === 'murid') {
+      const seen = new Set();
+      // Collect from students
+      ctx.studentData.forEach(s => {
+        if (s.kelas && s.rombel) {
+          const key = `${s.kelas}|${s.rombel}`;
+          if (!seen.has(key)) {
+            seen.add(key);
+            targets.push({ kelas: s.kelas, rombel: s.rombel });
+          }
+        }
+      });
+      // Collect from teachers
+      ctx.staffData.forEach(staff => {
+        const checkRole = (jab: any) => {
+          if (jab?.cat === 'Guru Kelas' && Array.isArray(jab?.kls)) {
+             jab.kls.forEach((k: string) => {
+                if (k) {
                   const romb = jab.rombel || 'Hanya Satu';
                   const key = `${k}|${romb}`;
                   if (!seen.has(key)) {
@@ -157,68 +198,6 @@ const AppContent = () => {
     );
   };
 
-  const renderMultipleClasses = () => {
-    const targets: any[] = [];
-    const seen = new Set();
-    // Collect from students
-    ctx.studentData.forEach(s => {
-      if (s.kelas && s.rombel && s.kelas !== 'Semua Kelas') {
-        const key = `${s.kelas}|${s.rombel}`;
-        if (!seen.has(key)) {
-          seen.add(key);
-          targets.push({ kelas: s.kelas, rombel: s.rombel });
-        }
-      }
-    });
-
-    // Collect from teachers
-    ctx.staffData.forEach(staff => {
-      const checkRole = (jab: any) => {
-        if (jab?.cat === 'Guru Kelas' && Array.isArray(jab?.kls)) {
-            jab.kls.forEach((k: string) => {
-              if (k && k !== 'Semua Kelas') {
-                const romb = jab.rombel || 'Hanya Satu';
-                const key = `${k}|${romb}`;
-                if (!seen.has(key)) {
-                  seen.add(key);
-                  targets.push({ kelas: k, rombel: romb });
-                }
-              }
-            });
-        }
-      };
-      checkRole(staff.jabatan?.primary);
-      if (staff.jabatan?.secondary?.active) checkRole(staff.jabatan?.secondary);
-    });
-
-    // Sort the targets primarily by Class, secondarily by Rombel
-    const classOrder = { "I": 1, "II": 2, "III": 3, "IV": 4, "V": 5, "VI": 6 };
-    targets.sort((a, b) => {
-      const orderA = (classOrder as any)[a.kelas] || 99;
-      const orderB = (classOrder as any)[b.kelas] || 99;
-      if (orderA !== orderB) return orderA - orderB;
-      return a.rombel.localeCompare(b.rombel);
-    });
-
-    if (targets.length === 0) {
-      return (
-        <div className="p-4 text-center text-slate-500 bg-white border border-slate-200 rounded-lg shadow-sm">
-          Belum ada data murid yang memiliki Kelas & Rombel. Silakan isi data di Data Database Murid.
-        </div>
-      );
-    }
-
-    return (
-      <div className="flex flex-col gap-8">
-        {targets.map((t, idx) => (
-          <div key={idx} className="print-page-wrapper page-break relative bg-white shadow-xl max-w-[21cm] mx-auto overflow-hidden">
-            <PrintableSheet overrideKelas={t.kelas} overrideRombel={t.rombel} />
-          </div>
-        ))}
-      </div>
-    );
-  };
-
   return (
     <div className={`p-4 ${isBulkPrinting ? 'is-bulk-printing' : ''}`}>
       <Topbar 
@@ -227,11 +206,7 @@ const AppContent = () => {
         onBulkPrint={handleBulkPrint}
       />
       
-      {!isBulkPrinting && (
-        ctx.mode === 'murid' && ctx.subModeMurid === 'kelas' && ctx.kelas === 'Semua Kelas'
-          ? renderMultipleClasses()
-          : <PrintableSheet />
-      )}
+      {!isBulkPrinting && <PrintableSheet />}
       {renderBulkPages()}
 
       <AnimatePresence>

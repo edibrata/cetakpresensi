@@ -63,5 +63,5 @@ export const bNames = [
   "Juli", "Agustus", "September", "Oktober", "November", "Desember"
 ];
 
-export const kelasOptions = ["Semua Kelas", "I", "II", "III", "IV", "V", "VI"];
+export const kelasOptions = ["I", "II", "III", "IV", "V", "VI"];
 export const rombelOptions = ["Hanya Satu", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];
