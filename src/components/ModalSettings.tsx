@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { X, Save, Upload, Download, Plus, Trash2, Calendar, User, Users, Book, CheckCircle, Search, Loader2, Cloud, Building2 } from 'lucide-react';
 import { motion } from 'motion/react';
-import { useAppContext } from '../context/AppContext';
+import { useAppContext, defaultState } from '../context/AppContext';
 import { Staff, Student, Holiday, kelasOptions, rombelOptions, bNames } from '../types';
 import { parseHolidaysExcel, exportHolidaysToExcel, exportPeopleToExcel, parsePeopleExcel } from '../utils/excel';
 import { fetchNpsnData } from '../lib/firebase';
@@ -38,7 +38,7 @@ export const ModalSettings: React.FC<ModalProps> = ({ isOpen, onClose }) => {
         setStatusMessage('Data tersinkronisasi.');
         
         const d = result.data;
-        const newState = { ...ctx };
+        const newState: any = { ...defaultState };
         newState.npsn = npsnInput.trim();
         
         if (d.sekolah !== undefined) newState.sekolah = d.sekolah;
@@ -64,36 +64,49 @@ export const ModalSettings: React.FC<ModalProps> = ({ isOpen, onClose }) => {
         
         ctx.restoreState(newState);
       } else {
+        // Coba cari di local storage jika cloud tidak ada 
+        const localKey = `absensi_f4_vSUPREME_FINAL_V12_LOCKED_FIXED_V4_MASTER_V_SUBMODE_V3_${npsnInput.trim()}`;
+        const saved = localStorage.getItem(localKey);
+        
+        if (saved) {
+          try {
+            const parsed = JSON.parse(saved);
+            const nextState: any = { ...defaultState, ...parsed };
+            nextState.npsn = npsnInput.trim();
+            ctx.restoreState(nextState);
+            
+            setCloudStatus('found');
+            setStatusMessage('Data lokal ditemukan (Offline).');
+            return;
+          } catch (err) {}
+        }
+
         setCloudStatus('new');
         setStatusMessage('NPSN baru siap digunakan. Ruang kerja telah direset.');
         
         // Reset the workspace for a new NPSN, so the user doesn't accidentally save old data to the new NPSN
         ctx.restoreState({
-          ...ctx, // Keep existing functions
-          npsn: npsnInput.trim(),
-          mode: 'pegawai',
-          subModeMurid: 'kelas',
-          sekolah: '',
-          kota: '',
-          kepsek: '',
-          nip: '',
-          wali: '',
-          nipWali: '',
-          tglManual: '',
-          bulan: new Date().getMonth(),
-          tahun: new Date().getFullYear(),
-          kelas: '',
-          rombel: '',
-          namaMapel: '',
-          tahunAjaranMapel: '',
-          semesterMapel: 'I (Ganjil)',
-          meetingCount: 0,
-          staffData: [],
-          studentData: [],
-          holidayData: []
+          ...defaultState,
+          npsn: npsnInput.trim()
         });
       }
     } catch (e) {
+      // Offline / Error fallback
+      const localKey = `absensi_f4_vSUPREME_FINAL_V12_LOCKED_FIXED_V4_MASTER_V_SUBMODE_V3_${npsnInput.trim()}`;
+      const saved = localStorage.getItem(localKey);
+      
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          const nextState: any = { ...defaultState, ...parsed };
+          nextState.npsn = npsnInput.trim();
+          ctx.restoreState(nextState);
+          setCloudStatus('found');
+          setStatusMessage('Gagal ke server. Memuat rupa lokal.');
+          return;
+        } catch (err) {}
+      }
+
       setCloudStatus('idle');
       setStatusMessage('Gagal menghubungi server.');
     }

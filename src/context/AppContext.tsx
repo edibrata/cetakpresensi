@@ -69,7 +69,13 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     if (isLoaded) {
+      // Save globally
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      
+      // Save specifically for this NPSN (offline support)
+      if (state.npsn && state.npsn.trim() !== '') {
+        localStorage.setItem(`${STORAGE_KEY}_${state.npsn.trim()}`, JSON.stringify(state));
+      }
       
       // Auto save to Firestore if NPSN is provided
       if (state.npsn && state.npsn.trim() !== '') {

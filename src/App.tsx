@@ -6,6 +6,7 @@ import { PrintableSheet } from './components/PrintableSheet';
 import { ModalSettings } from './components/ModalSettings';
 import { ModalLibur } from './components/ModalLibur';
 import { ModalDatabase } from './components/ModalDatabase';
+import { bNames } from './types';
 
 const AppContent = () => {
   const ctx = useAppContext();
@@ -20,9 +21,47 @@ const AppContent = () => {
     const handleAfterPrint = () => {
       setIsBulkPrinting(false);
     };
+    
+    const formatTimestamp = () => {
+      const d = new Date();
+      const pad = (n: number) => n.toString().padStart(2, '0');
+      return `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())} ${pad(d.getHours())}.${pad(d.getMinutes())}.${pad(d.getSeconds())}`;
+    };
+
+    const handleBeforePrint = () => {
+      const ts = formatTimestamp();
+      const namaSekolah = ctx.sekolah || 'Sekolah';
+      const bulan = bNames[ctx.bulan];
+      const tahun = ctx.tahun;
+      
+      let title = '';
+      
+      if (ctx.mode === 'pegawai') {
+        if (isBulkPrinting) {
+           title = `Edi Brata Presensi Pegawai ${namaSekolah} ${tahun} Januari - Desember ${ts}`;
+        } else {
+           title = `Edi Brata Presensi Pegawai ${namaSekolah} ${tahun} ${bulan} ${ts}`;
+        }
+      } else {
+        if (isBulkPrinting) {
+           title = `Edi Brata Presensi Murid ${namaSekolah} ${tahun} ${bulan} ${ts}`;
+        } else {
+           const kls = ctx.kelas ? ` ${ctx.kelas}` : '';
+           const rmb = ctx.rombel && ctx.rombel !== 'Hanya Satu' ? ` ${ctx.rombel}` : '';
+           title = `Edi Brata Presensi Murid ${namaSekolah}${kls}${rmb} ${tahun} ${bulan} ${ts}`;
+        }
+      }
+      
+      document.title = title;
+    };
+
+    window.addEventListener('beforeprint', handleBeforePrint);
     window.addEventListener('afterprint', handleAfterPrint);
-    return () => window.removeEventListener('afterprint', handleAfterPrint);
-  }, []);
+    return () => {
+      window.removeEventListener('beforeprint', handleBeforePrint);
+      window.removeEventListener('afterprint', handleAfterPrint);
+    };
+  }, [ctx, isBulkPrinting]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
