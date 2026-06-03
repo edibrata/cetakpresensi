@@ -144,7 +144,8 @@ th, td {
 .murid-mode td:nth-child(2), 
 .pegawai-mode td:nth-child(2) { 
   font-weight: normal;
-  text-align: justify !important;
+  text-align: left !important;
+  padding-left: 6px !important;
 }
 
 .holiday { background-color: #f3f4f6 !important; }
