@@ -43,12 +43,13 @@ const AppContent = () => {
            title = `Edi Brata Presensi Pegawai ${namaSekolah} ${tahun} ${bulan} ${ts}`;
         }
       } else {
+        const mapel = ctx.subModeMurid === 'mapel' && ctx.namaMapel ? ` ${ctx.namaMapel}` : '';
         if (isBulkPrinting) {
-           title = `Edi Brata Presensi Murid ${namaSekolah} ${tahun} ${bulan} ${ts}`;
+           title = `Edi Brata Presensi Murid${mapel} ${namaSekolah} ${tahun} ${bulan} ${ts}`;
         } else {
-           const kls = ctx.kelas ? ` ${ctx.kelas}` : '';
+           const kls = ctx.kelas ? ` Kelas ${ctx.kelas}` : '';
            const rmb = ctx.rombel && ctx.rombel !== 'Hanya Satu' ? ` ${ctx.rombel}` : '';
-           title = `Edi Brata Presensi Murid ${namaSekolah}${kls}${rmb} ${tahun} ${bulan} ${ts}`;
+           title = `Edi Brata Presensi Murid${mapel} ${namaSekolah}${kls}${rmb} ${tahun} ${bulan} ${ts}`;
         }
       }
       
