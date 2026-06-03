@@ -260,7 +260,7 @@ export const Topbar: React.FC<TopbarProps> = ({ onOpenModal, onOpenDataModal, on
             <Tooltip content="Pilih Kelas">
               <div className="flex flex-row items-center gap-1 bg-white border border-slate-200 rounded-md px-2 py-1.5 shadow-sm flex-shrink-0 hover:border-slate-300 transition-colors">
                 <User size={14} className="text-slate-400" />
-                <select value={ctx.kelas} onChange={(e) => ctx.setField('kelas', e.target.value)} className="outline-none text-xs font-medium bg-transparent text-slate-700 w-16">
+                <select value={ctx.kelas} onChange={(e) => ctx.setField('kelas', e.target.value)} className="outline-none text-xs font-medium bg-transparent text-slate-700 min-w-[70px]">
                   <option value="">Kelas</option>
                   {kelasOptions.map((k) => <option key={k} value={k}>{k}</option>)}
                 </select>
