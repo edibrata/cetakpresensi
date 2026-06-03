@@ -38,6 +38,7 @@ interface AppContextType extends AppState {
   updateHolidayData: (data: Holiday[]) => void;
   restoreState: (state: AppState) => void;
   syncPejabatData: () => void;
+  saveToCloud: () => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -76,17 +77,23 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       if (state.npsn && state.npsn.trim() !== '') {
         localStorage.setItem(`${STORAGE_KEY}_${state.npsn.trim()}`, JSON.stringify(state));
       }
-      
-      // Auto save to Firestore if NPSN is provided
-      if (state.npsn && state.npsn.trim() !== '') {
-        if (debounceRef.current) clearTimeout(debounceRef.current);
-        debounceRef.current = setTimeout(() => {
-          const { npsn, ...stateToSave } = state;
-          saveNpsnData(state.npsn.trim(), stateToSave).catch(err => console.error("Cloud sync failed:", err));
-        }, 1500); // 1.5s debounce
-      }
     }
   }, [state, isLoaded]);
+
+  const saveToCloud = async () => {
+    if (state.npsn && state.npsn.trim() !== '') {
+      const { npsn, ...stateToSave } = state;
+      try {
+        await saveNpsnData(state.npsn.trim(), stateToSave);
+        alert('Data berhasil disimpan ke cloud Firebase!');
+      } catch (err) {
+        console.error("Cloud sync failed:", err);
+        alert('Gagal menyimpan ke cloud: ' + (err as Error).message);
+      }
+    } else {
+      alert('NPSN tidak ditemukan. Data tidak dapat disimpan ke cloud.');
+    }
+  };
 
   const syncPejabatData = () => {
     let foundKepsek: { nama: string; nip: string } | null = null;
@@ -179,7 +186,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       updateStudentData,
       updateHolidayData,
       restoreState,
-      syncPejabatData
+      syncPejabatData,
+      saveToCloud
     }}>
       {children}
     </AppContext.Provider>

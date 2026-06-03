@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { Calendar as CalendarIcon, Users, User, Download, Upload, Printer, List, IdCard, GraduationCap, Files, Landmark, Settings, CalendarDays, BookOpen, RotateCcw } from 'lucide-react';
+import { Calendar as CalendarIcon, Users, User, Download, Upload, Printer, List, IdCard, GraduationCap, Files, Landmark, Settings, CalendarDays, BookOpen, RotateCcw, CloudUpload } from 'lucide-react';
 import { useAppContext, defaultState } from '../context/AppContext';
 import { MapelInput } from './MapelInput';
 import { bNames, kelasOptions, rombelOptions } from '../types';
@@ -160,6 +160,11 @@ export const Topbar: React.FC<TopbarProps> = ({ onOpenModal, onOpenDataModal, on
             <div className="flex-grow"></div>
 
             <div className="flex flex-row gap-2 flex-shrink-0">
+              <Tooltip content="Simpan ke Cloud">
+                <button onClick={() => ctx.saveToCloud()} className="flex items-center justify-center p-1.5 rounded-md border border-emerald-200 bg-emerald-50 text-emerald-600 transition-all hover:bg-emerald-100 active:scale-95 shadow-sm">
+                  <CloudUpload size={14} className="text-emerald-600" />
+                </button>
+              </Tooltip>
               <Tooltip content="Reset Data">
                 <button onClick={handleReset} className="flex items-center justify-center p-1.5 rounded-md border border-red-200 bg-red-50 text-red-600 transition-all hover:bg-red-100 active:scale-95 shadow-sm">
                   <RotateCcw size={14} className="text-red-500" />
@@ -187,6 +192,11 @@ export const Topbar: React.FC<TopbarProps> = ({ onOpenModal, onOpenDataModal, on
             </div>
             
             <div className="flex flex-row gap-2 flex-shrink-0 items-center">
+              <Tooltip content="Simpan ke Cloud">
+                <button onClick={() => ctx.saveToCloud()} className="flex items-center justify-center p-1.5 rounded-md border border-emerald-200 bg-emerald-50 text-emerald-600 transition-all hover:bg-emerald-100 active:scale-95 shadow-sm">
+                  <CloudUpload size={14} className="text-emerald-600" />
+                </button>
+              </Tooltip>
               <Tooltip content="Reset Data">
                 <button onClick={handleReset} className="flex items-center justify-center p-1.5 rounded-md border border-red-200 bg-red-50 text-red-600 transition-all hover:bg-red-100 active:scale-95 shadow-sm">
                   <RotateCcw size={14} className="text-red-500" />
@@ -291,6 +301,11 @@ export const Topbar: React.FC<TopbarProps> = ({ onOpenModal, onOpenDataModal, on
             <div className="flex-grow"></div>
 
             <div className="flex flex-row gap-2 flex-shrink-0 items-center">
+              <Tooltip content="Simpan ke Cloud">
+                <button onClick={() => ctx.saveToCloud()} className="flex items-center justify-center p-1.5 rounded-md border border-emerald-200 bg-emerald-50 text-emerald-600 transition-all hover:bg-emerald-100 active:scale-95 shadow-sm">
+                  <CloudUpload size={14} className="text-emerald-600" />
+                </button>
+              </Tooltip>
               <Tooltip content="Reset Data">
                 <button onClick={handleReset} className="flex items-center justify-center p-1.5 rounded-md border border-red-200 bg-red-50 text-red-600 transition-all hover:bg-red-100 active:scale-95 shadow-sm">
                   <RotateCcw size={14} className="text-red-500" />

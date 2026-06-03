@@ -160,6 +160,8 @@ export const ModalDatabase: React.FC<ModalProps> = ({ isOpen, onClose, target })
       if (val !== 'Guru Mapel' && val !== 'Lainnya') targetRole.sub = '';
     } else if (field === 'sub') {
       targetRole.sub = val;
+    } else if (field === 'rombel') {
+      targetRole.rombel = val;
     } else if (field === 'kls') {
       const currentKls = [...targetRole.kls];
       if (isChecked) {
@@ -213,13 +215,21 @@ export const ModalDatabase: React.FC<ModalProps> = ({ isOpen, onClose, target })
           />
         )}
         {(dataPart.cat !== 'Kepsek' && dataPart.cat !== 'Plt. Kepsek' && dataPart.cat !== 'Lainnya') && (
-          <div className="flex flex-wrap gap-x-3 gap-y-1 items-center bg-white p-1 rounded border border-slate-100 mt-1">
-            {kelasOptions.map(k => (
-              <label key={k} className="flex items-center gap-1 cursor-pointer">
-                <input type="checkbox" className="w-3 h-3 cursor-pointer" checked={dataPart.kls.includes(k)} onChange={e => updateStaffJabatan(idx, type, 'kls', k, e.target.checked)} />
-                <span className="text-[10px] font-bold text-slate-600">{k}</span>
-              </label>
-            ))}
+          <div className="flex flex-col gap-1 mt-1">
+            <div className="flex flex-wrap gap-x-3 gap-y-1 items-center bg-white p-1 rounded border border-slate-100">
+              {kelasOptions.map(k => (
+                <label key={k} className="flex items-center gap-1 cursor-pointer">
+                  <input type="checkbox" className="w-3 h-3 cursor-pointer" checked={dataPart.kls?.includes(k)} onChange={e => updateStaffJabatan(idx, type, 'kls', k, e.target.checked)} />
+                  <span className="text-[10px] font-bold text-slate-600">{k}</span>
+                </label>
+              ))}
+            </div>
+            {dataPart.cat === 'Guru Kelas' && (
+              <select className="w-full bg-white border border-slate-100 rounded p-1 text-[10px] font-bold" value={dataPart.rombel || ""} onChange={e => updateStaffJabatan(idx, type, 'rombel', e.target.value)}>
+                <option value="">Rombel (Kosongkan jika hanya 1)</option>
+                {rombelOptions.map(o => <option key={o} value={o}>{o}</option>)}
+              </select>
+            )}
           </div>
         )}
       </div>
@@ -307,8 +317,8 @@ export const ModalDatabase: React.FC<ModalProps> = ({ isOpen, onClose, target })
                     <td className="p-1 border-r border-slate-200 text-center text-slate-400">
                       <input type="checkbox" className="w-3.5 h-3.5 cursor-pointer" checked={selectedRows.has(idx)} onChange={() => toggleRowChecked(idx)} />
                     </td>
-                    <td className="p-1 border-r border-slate-200 text-center text-slate-300 hover:text-slate-500 cursor-grab active:cursor-grabbing flex justify-center">
-                      <GripVertical size={16} />
+                    <td className="p-1 border-r border-slate-200 text-center text-slate-300 hover:text-slate-500 cursor-grab active:cursor-grabbing align-middle">
+                      <GripVertical size={16} className="mx-auto" />
                     </td>
                     <td className="p-1 border-r border-slate-200 text-center text-sm text-slate-400">{idx + 1}</td>
                     <td className="p-1 border-r border-slate-200"><input type="text" className="!text-left w-full bg-transparent p-2 text-sm outline-none transition-colors hover:bg-white focus:bg-white border border-transparent focus:border-blue-300 rounded" value={item.nama} onChange={e => updateStudent(idx, 'nama', e.target.value)} /></td>

@@ -5,6 +5,7 @@ export interface JabatanPart {
   cat: string;
   sub: string;
   kls: string[];
+  rombel?: string;
 }
 
 export interface Jabatan {

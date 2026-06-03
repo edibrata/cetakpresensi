@@ -302,9 +302,9 @@ export const PrintableSheet: React.FC<PrintableSheetProps> = ({ overrideKelas, o
     if (ctx.subModeMurid === 'kelas') {
       const matchedGuru = ctx.staffData.find(staff => {
         const jab = staff.jabatan?.primary;
-        if (jab?.cat === 'Guru Kelas' && jab?.sub === ctx.kelas) {
+        if (jab?.cat === 'Guru Kelas' && jab?.kls?.includes(ctx.kelas)) {
           if (ctx.rombel && ctx.rombel !== 'Hanya Satu') {
-            return staff.jabatan?.rombel === ctx.rombel;
+            return jab?.rombel === ctx.rombel;
           }
           return true;
         }

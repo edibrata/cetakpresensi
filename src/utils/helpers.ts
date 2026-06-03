@@ -22,7 +22,11 @@ export const buildTugasString = (jab: any) => {
       if (klsStr) s += ` Kelas ${klsStr}`;
       return s;
     }
-    if (d.cat === "Guru Kelas") return klsStr ? `Guru Kelas ${klsStr}` : "Guru Kelas";
+    if (d.cat === "Guru Kelas") {
+      let s = klsStr ? `Guru Kelas ${klsStr}` : "Guru Kelas";
+      if (d.rombel && d.rombel !== 'Hanya Satu') s += `-${d.rombel}`;
+      return s;
+    }
     return d.sub || "Lainnya";
   };
   let final = build(jab.primary);
@@ -36,7 +40,7 @@ export const parseJabatan = (jabatanStr: string) => {
   const separator = jabatanStr.includes('|') ? '|' : '&';
   const parts = jabatanStr.split(separator).map(p => p.trim());
   const parseSingle = (pStr: string) => {
-    let cat = "Lainnya", sub = "", kls: string[] = [];
+    let cat = "Lainnya", sub = "", kls: string[] = [], rombel = "";
     if (pStr.includes("Plt. Kepsek")) cat = "Plt. Kepsek";
     else if (pStr.includes("Kepsek")) cat = "Kepsek";
     else if (pStr.includes("Guru Mapel")) cat = "Guru Mapel";
@@ -48,6 +52,11 @@ export const parseJabatan = (jabatanStr: string) => {
       if (reg.test(pStr)) kls.push(k);
     });
 
+    if (cat === "Guru Kelas") {
+      const m = pStr.match(/Guru Kelas [IVX]+-([A-Z])/);
+      if (m) rombel = m[1];
+    }
+
     if (cat === "Guru Mapel") {
       let match = pStr.match(/Guru Mapel\s+([^(\s|]+)/);
       if (match) sub = match[1].trim();
@@ -55,7 +64,7 @@ export const parseJabatan = (jabatanStr: string) => {
     } else if (cat === "Lainnya") {
       sub = pStr;
     }
-    return { cat, sub, kls };
+    return { cat, sub, kls, rombel };
   };
   return { primary: parseSingle(parts[0]), secondary: { active: parts.length > 1, ...parseSingle(parts[1] || "") } };
 };
