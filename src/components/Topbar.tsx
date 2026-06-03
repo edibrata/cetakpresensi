@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { Calendar as CalendarIcon, Users, User, Download, Upload, Printer, List, IdCard, GraduationCap, Files, Landmark, Settings, CalendarDays, BookOpen } from 'lucide-react';
-import { useAppContext } from '../context/AppContext';
+import { Calendar as CalendarIcon, Users, User, Download, Upload, Printer, List, IdCard, GraduationCap, Files, Landmark, Settings, CalendarDays, BookOpen, RotateCcw } from 'lucide-react';
+import { useAppContext, defaultState } from '../context/AppContext';
 import { MapelInput } from './MapelInput';
 import { bNames, kelasOptions, rombelOptions } from '../types';
 import { getTimestamp } from '../utils/excel';
@@ -57,6 +57,12 @@ export const Topbar: React.FC<TopbarProps> = ({ onOpenModal, onOpenDataModal, on
     a.download = `Backup DH ${sekolah} ${ts}.json`;
     a.click();
     URL.revokeObjectURL(url);
+  };
+
+  const handleReset = () => {
+    if (window.confirm("Apakah Anda yakin ingin mereset semua data pada NPSN ini? Aksi ini tidak dapat dibatalkan.")) {
+      ctx.restoreState({ ...defaultState, npsn: ctx.npsn });
+    }
   };
 
   const isMapel = activeTab === 'murid' && ctx.subModeMurid === 'mapel';
@@ -154,6 +160,11 @@ export const Topbar: React.FC<TopbarProps> = ({ onOpenModal, onOpenDataModal, on
             <div className="flex-grow"></div>
 
             <div className="flex flex-row gap-2 flex-shrink-0">
+              <Tooltip content="Reset Data">
+                <button onClick={handleReset} className="flex items-center justify-center p-1.5 rounded-md border border-red-200 bg-red-50 text-red-600 transition-all hover:bg-red-100 active:scale-95 shadow-sm">
+                  <RotateCcw size={14} className="text-red-500" />
+                </button>
+              </Tooltip>
               <Tooltip content="Backup Data">
                 <button onClick={handleBackup} className="flex items-center justify-center p-1.5 rounded-md border border-slate-200 bg-white text-slate-600 transition-all hover:bg-slate-50 active:scale-95 shadow-sm">
                   <Download size={14} className="text-slate-500" />
@@ -176,6 +187,11 @@ export const Topbar: React.FC<TopbarProps> = ({ onOpenModal, onOpenDataModal, on
             </div>
             
             <div className="flex flex-row gap-2 flex-shrink-0 items-center">
+              <Tooltip content="Reset Data">
+                <button onClick={handleReset} className="flex items-center justify-center p-1.5 rounded-md border border-red-200 bg-red-50 text-red-600 transition-all hover:bg-red-100 active:scale-95 shadow-sm">
+                  <RotateCcw size={14} className="text-red-500" />
+                </button>
+              </Tooltip>
               <Tooltip content="Backup Data">
                 <button onClick={handleBackup} className="flex items-center justify-center p-1.5 rounded-md border border-slate-200 bg-white text-slate-600 transition-all hover:bg-slate-50 active:scale-95 shadow-sm">
                   <Download size={14} className="text-slate-500" />
@@ -275,6 +291,11 @@ export const Topbar: React.FC<TopbarProps> = ({ onOpenModal, onOpenDataModal, on
             <div className="flex-grow"></div>
 
             <div className="flex flex-row gap-2 flex-shrink-0 items-center">
+              <Tooltip content="Reset Data">
+                <button onClick={handleReset} className="flex items-center justify-center p-1.5 rounded-md border border-red-200 bg-red-50 text-red-600 transition-all hover:bg-red-100 active:scale-95 shadow-sm">
+                  <RotateCcw size={14} className="text-red-500" />
+                </button>
+              </Tooltip>
               <Tooltip content="Backup Data">
                 <button onClick={handleBackup} className="flex items-center justify-center p-1.5 rounded-md border border-slate-200 bg-white text-slate-600 transition-all hover:bg-slate-50 active:scale-95 shadow-sm">
                   <Download size={14} className="text-slate-500" />
