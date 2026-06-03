@@ -38,7 +38,8 @@ interface AppContextType extends AppState {
   updateHolidayData: (data: Holiday[]) => void;
   restoreState: (state: AppState) => void;
   syncPejabatData: () => void;
-  saveToCloud: () => Promise<void>;
+  syncStatus: 'idle' | 'saving' | 'saved' | 'error';
+  saveToCloud: (silent?: boolean) => Promise<void>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -46,6 +47,7 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [state, setState] = useState<AppState>(defaultState);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [syncStatus, setSyncStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
 
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
@@ -76,22 +78,33 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       // Save specifically for this NPSN (offline support)
       if (state.npsn && state.npsn.trim() !== '') {
         localStorage.setItem(`${STORAGE_KEY}_${state.npsn.trim()}`, JSON.stringify(state));
+        
+        // Auto-save to cloud
+        setSyncStatus('saving');
+        if (debounceRef.current) clearTimeout(debounceRef.current);
+        debounceRef.current = setTimeout(() => {
+          saveToCloud(true);
+        }, 2000);
       }
     }
   }, [state, isLoaded]);
 
-  const saveToCloud = async () => {
+  const saveToCloud = async (silent: boolean = false) => {
     if (state.npsn && state.npsn.trim() !== '') {
+      setSyncStatus('saving');
       const { npsn, ...stateToSave } = state;
       try {
         await saveNpsnData(state.npsn.trim(), stateToSave);
-        alert('Data berhasil disimpan ke cloud Firebase!');
+        setSyncStatus('saved');
+        setTimeout(() => setSyncStatus('idle'), 3000);
+        if (!silent) alert('Data berhasil disimpan ke cloud Firebase!');
       } catch (err) {
         console.error("Cloud sync failed:", err);
-        alert('Gagal menyimpan ke cloud: ' + (err as Error).message);
+        setSyncStatus('error');
+        if (!silent) alert('Gagal menyimpan ke cloud: ' + (err as Error).message);
       }
     } else {
-      alert('NPSN tidak ditemukan. Data tidak dapat disimpan ke cloud.');
+      if (!silent) alert('NPSN tidak ditemukan. Data tidak dapat disimpan ke cloud.');
     }
   };
 
@@ -187,7 +200,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       updateHolidayData,
       restoreState,
       syncPejabatData,
-      saveToCloud
+      saveToCloud,
+      syncStatus
     }}>
       {children}
     </AppContext.Provider>
