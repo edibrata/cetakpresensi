@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { AnimatePresence } from 'motion/react';
 import { AppProvider, useAppContext } from './context/AppContext';
 import { Topbar } from './components/Topbar';
-import { Sidebar } from './components/Sidebar';
 import { PrintableSheet } from './components/PrintableSheet';
 import { ModalSettings } from './components/ModalSettings';
 import { ModalLibur } from './components/ModalLibur';
@@ -11,16 +10,37 @@ import { ModalDatabase } from './components/ModalDatabase';
 const AppContent = () => {
   const ctx = useAppContext();
   
-  const [activeView, setActiveView] = useState<string>('cetak');
+  const [activeModal, setActiveModal] = useState<string | null>(null);
+  const [dataTarget, setDataTarget] = useState<'pegawai' | 'murid'>('pegawai');
+  
   const [isBulkPrinting, setIsBulkPrinting] = useState(false);
 
   useEffect(() => {
+    // Add print event listeners
     const handleAfterPrint = () => {
       setIsBulkPrinting(false);
     };
     window.addEventListener('afterprint', handleAfterPrint);
     return () => window.removeEventListener('afterprint', handleAfterPrint);
   }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && activeModal) {
+        handleCloseModal();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [activeModal]);
+
+  const handleOpenModal = (id: string) => setActiveModal(id);
+  const handleCloseModal = () => setActiveModal(null);
+  
+  const handleOpenDataModal = (target: 'pegawai' | 'murid') => {
+    setDataTarget(target);
+    setActiveModal('modalDatabase');
+  };
 
   const handleBulkPrint = () => {
     setIsBulkPrinting(true);
@@ -69,32 +89,21 @@ const AppContent = () => {
   };
 
   return (
-    <div className={`flex h-screen bg-slate-100 overflow-hidden ${isBulkPrinting ? 'is-bulk-printing' : ''}`}>
-      {!isBulkPrinting && (
-        <Sidebar 
-          activeView={activeView} 
-          setActiveView={setActiveView} 
-          onBulkPrint={handleBulkPrint} 
-        />
-      )}
+    <div className={`p-4 ${isBulkPrinting ? 'is-bulk-printing' : ''}`}>
+      <Topbar 
+        onOpenModal={handleOpenModal} 
+        onOpenDataModal={handleOpenDataModal} 
+        onBulkPrint={handleBulkPrint}
+      />
       
-      <div className="flex-1 overflow-auto flex flex-col items-center">
-        {!isBulkPrinting && activeView === 'cetak' && (
-          <div className="w-full p-4 pb-0 max-w-[1600px] flex-shrink-0">
-            <Topbar onBulkPrint={handleBulkPrint} />
-          </div>
-        )}
+      {!isBulkPrinting && <PrintableSheet />}
+      {renderBulkPages()}
 
-        <div className="flex-1 w-full overflow-y-auto p-4 flex justify-center custom-scrollbar">
-          {!isBulkPrinting && activeView === 'cetak' && <PrintableSheet />}
-          {!isBulkPrinting && activeView === 'identitas' && <ModalSettings inline />}
-          {!isBulkPrinting && activeView === 'libur' && <ModalLibur inline />}
-          {!isBulkPrinting && activeView === 'pegawai' && <ModalDatabase target="pegawai" inline />}
-          {!isBulkPrinting && activeView === 'murid' && <ModalDatabase target="murid" inline />}
-        </div>
-        
-        {renderBulkPages()}
-      </div>
+      <AnimatePresence>
+        {activeModal === 'modalSettings' && <ModalSettings key="modalSettings" isOpen={activeModal === 'modalSettings'} onClose={handleCloseModal} />}
+        {activeModal === 'modalLibur' && <ModalLibur key="modalLibur" isOpen={activeModal === 'modalLibur'} onClose={handleCloseModal} />}
+        {activeModal === 'modalDatabase' && <ModalDatabase key="modalDatabase" isOpen={activeModal === 'modalDatabase'} onClose={handleCloseModal} target={dataTarget} />}
+      </AnimatePresence>
     </div>
   );
 };

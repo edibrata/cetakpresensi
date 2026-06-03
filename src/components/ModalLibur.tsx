@@ -6,16 +6,15 @@ import { bNames, Holiday } from '../types';
 import { parseHolidaysExcel, exportHolidaysToExcel } from '../utils/excel';
 
 interface ModalProps {
-  isOpen?: boolean;
-  onClose?: () => void;
-  inline?: boolean;
+  isOpen: boolean;
+  onClose: () => void;
 }
 
-export const ModalLibur: React.FC<ModalProps> = ({ isOpen = true, onClose, inline = false }) => {
+export const ModalLibur: React.FC<ModalProps> = ({ isOpen, onClose }) => {
   const ctx = useAppContext();
   const fileRef = useRef<HTMLInputElement>(null);
   
-  if (!isOpen && !inline) return null;
+  if (!isOpen) return null;
 
   const data = [...ctx.holidayData].sort((a, b) => Number(a.month) - Number(b.month) || String(a.date).split(',')[0].localeCompare(String(b.date).split(',')[0]));
 
@@ -44,31 +43,38 @@ export const ModalLibur: React.FC<ModalProps> = ({ isOpen = true, onClose, inlin
     }
   };
 
-  const content = (
-    <div 
-      className={`bg-white rounded-lg border border-slate-200 shadow-sm w-full max-w-3xl max-h-[90vh] flex flex-col font-sans text-slate-800 ${inline ? 'h-fit max-h-none shadow-md mx-auto my-4' : 'overflow-hidden'}`} 
-      onClick={e => e.stopPropagation()}
+  return (
+    <motion.div 
+      initial={{ opacity: 0 }} 
+      animate={{ opacity: 1 }} 
+      exit={{ opacity: 0 }} 
+      transition={{ duration: 0.2 }}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4" 
+      onClick={onClose}
     >
-      <div className="px-5 py-4 border-b border-slate-200 flex justify-between items-center bg-white font-semibold">
-        <h3 className="text-lg font-semibold tracking-tight text-slate-800 flex items-center gap-2">
-          <Calendar size={18} className="text-slate-500" /> Master Hari Libur Tahunan
-        </h3>
-        <div className="flex gap-2">
-          <button onClick={() => exportHolidaysToExcel(ctx.holidayData, ctx.sekolah)} className="p-1.5 rounded-md hover:bg-slate-100 transition-all text-slate-500 border border-transparent active:scale-95 hover:text-slate-700" title="Ekspor Libur ke Excel">
-            <Download size={18} />
-          </button>
-          <button onClick={() => fileRef.current?.click()} className="p-1.5 rounded-md hover:bg-slate-100 transition-all text-slate-500 border border-transparent active:scale-95 hover:text-slate-700" title="Impor Libur dari Excel">
-            <Upload size={18} />
-          </button>
-          <input type="file" ref={fileRef} className="hidden" accept=".xlsx, .xls" onChange={handleImport} />
-          {!inline && onClose && (
-            <button onClick={onClose} className="p-1.5 hover:bg-slate-100 rounded-md transition-all text-slate-500 active:scale-95 ml-2">
-              <X size={20} />
+      <motion.div 
+        initial={{ scale: 0.95, opacity: 0 }} 
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.95, opacity: 0 }}
+        transition={{ duration: 0.2 }}
+        className="bg-white rounded-lg border border-slate-200 shadow-sm w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col font-sans text-slate-800" 
+        onClick={e => e.stopPropagation()}
+      >
+        <div className="px-5 py-4 border-b border-slate-200 flex justify-between items-center bg-white font-semibold">
+          <h3 className="text-lg font-semibold tracking-tight text-slate-800 flex items-center gap-2">
+            <Calendar size={18} className="text-slate-500" /> Master Hari Libur Tahunan
+          </h3>
+          <div className="flex gap-2">
+            <button onClick={() => exportHolidaysToExcel(ctx.holidayData, ctx.sekolah)} className="p-1.5 rounded-md hover:bg-slate-100 transition-all text-slate-500 border border-transparent active:scale-95 hover:text-slate-700" title="Ekspor Libur ke Excel">
+              <Download size={18} />
             </button>
-          )}
+            <button onClick={() => fileRef.current?.click()} className="p-1.5 rounded-md hover:bg-slate-100 transition-all text-slate-500 border border-transparent active:scale-95 hover:text-slate-700" title="Impor Libur dari Excel">
+              <Upload size={18} />
+            </button>
+            <input type="file" ref={fileRef} className="hidden" accept=".xlsx, .xls" onChange={handleImport} />
+          </div>
         </div>
-      </div>
-      <div className={`p-6 overflow-y-auto flex-1 bg-white ${inline ? 'overflow-visible' : ''}`}>
+        <div className="p-6 overflow-y-auto flex-1 bg-white">
           <table className="w-full text-left border-collapse mb-4 border border-slate-200 table-fixed">
             <thead>
               <tr className="bg-slate-50 text-[11px] uppercase font-semibold text-slate-500 border-b border-slate-200">
@@ -109,39 +115,11 @@ export const ModalLibur: React.FC<ModalProps> = ({ isOpen = true, onClose, inlin
             <Plus size={16} /> Tambah Baris Libur
           </button>
         </div>
-        <div className="px-5 py-4 border-t border-slate-200 bg-white text-right space-x-2">
-          {inline ? (
-            <span className="text-slate-400 text-xs italic">Perubahan tersimpan otomatis</span>
-          ) : (
-            <button onClick={onClose} className="w-full py-2 bg-blue-500 text-white rounded-md font-medium text-sm hover:bg-blue-600 active:bg-blue-700 active:scale-[0.99] transition-all">
-              Selesai
-            </button>
-          )}
+        <div className="px-5 py-4 border-t border-slate-200 bg-white">
+          <button onClick={onClose} className="w-full py-2 bg-blue-500 text-white rounded-md font-medium text-sm hover:bg-blue-600 active:bg-blue-700 active:scale-[0.99] transition-all">
+            Selesai
+          </button>
         </div>
-    </div>
-  );
-
-  if (inline) {
-    return content;
-  }
-
-  return (
-    <motion.div 
-      initial={{ opacity: 0 }} 
-      animate={{ opacity: 1 }} 
-      exit={{ opacity: 0 }} 
-      transition={{ duration: 0.2 }}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4" 
-      onClick={onClose}
-    >
-      <motion.div 
-        initial={{ scale: 0.95, opacity: 0 }} 
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.95, opacity: 0 }}
-        transition={{ duration: 0.2 }}
-        className="w-full max-w-3xl"
-      >
-        {content}
       </motion.div>
     </motion.div>
   );

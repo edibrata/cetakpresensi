@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { X, Upload, Download, Trash2, Plus, Users, GraduationCap } from 'lucide-react';
+import { X, Upload, Download, Trash2, Plus } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useAppContext } from '../context/AppContext';
 import { MapelInput } from './MapelInput';
@@ -8,17 +8,16 @@ import { exportPeopleToExcel, parsePeopleExcel } from '../utils/excel';
 import { buildTugasString } from '../utils/helpers';
 
 interface ModalProps {
-  isOpen?: boolean;
-  onClose?: () => void;
+  isOpen: boolean;
+  onClose: () => void;
   target: 'pegawai' | 'murid';
-  inline?: boolean;
 }
 
-export const ModalDatabase: React.FC<ModalProps> = ({ isOpen = true, onClose, target, inline = false }) => {
+export const ModalDatabase: React.FC<ModalProps> = ({ isOpen, onClose, target }) => {
   const ctx = useAppContext();
   const fileRef = useRef<HTMLInputElement>(null);
   
-  if (!isOpen && !inline) return null;
+  if (!isOpen) return null;
 
   const isMurid = target === 'murid';
   const data = isMurid ? ctx.studentData : ctx.staffData;
@@ -148,36 +147,40 @@ export const ModalDatabase: React.FC<ModalProps> = ({ isOpen = true, onClose, ta
     );
   };
 
-  const content = (
-    <div 
-      className={`bg-white rounded-lg border border-slate-200 shadow-sm w-full max-w-[1100px] max-h-[90vh] flex flex-col font-sans text-slate-800 ${inline ? 'h-fit max-h-none shadow-md mx-auto my-4' : 'overflow-hidden'}`} 
-      onClick={e => e.stopPropagation()}
+  return (
+    <motion.div 
+      initial={{ opacity: 0 }} 
+      animate={{ opacity: 1 }} 
+      exit={{ opacity: 0 }} 
+      transition={{ duration: 0.2 }}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4" 
+      onClick={onClose}
     >
-      <div className="px-5 py-4 border-b border-slate-200 bg-white flex flex-wrap justify-between items-center gap-4 font-semibold rounded-t-lg">
-        <h3 className="text-lg font-semibold tracking-tight text-slate-800 flex items-center gap-2">
-          {isMurid ? <div className="p-1.5 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600"><GraduationCap size={18} /></div> : <div className="p-1.5 rounded-lg bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600"><Users size={18} /></div>} 
-          Database {isMurid ? 'Murid' : 'Pegawai'}
-        </h3>
-        <div className="flex flex-wrap gap-2 items-center">
-          <button onClick={() => exportPeopleToExcel(isMurid, data, ctx.sekolah)} className="px-4 py-1.5 border border-slate-200 rounded-md bg-white text-xs text-slate-600 font-medium transition-all active:scale-95 hover:bg-slate-50 flex items-center gap-1 hover:border-slate-300">
-            <Download size={14} /> Ekspor
-          </button>
-          <button onClick={() => fileRef.current?.click()} className="px-4 py-1.5 border border-slate-200 rounded-md bg-white text-xs text-slate-600 font-medium transition-all active:scale-95 hover:bg-slate-50 cursor-pointer flex items-center gap-1 hover:border-slate-300">
-            <Upload size={14} /> Impor
-          </button>
-          <input type="file" ref={fileRef} accept=".xlsx, .xls" className="hidden" onChange={handleImport} />
-          <button onClick={clearAllData} className="px-4 py-1.5 border border-slate-200 rounded-md bg-white text-xs text-red-600 font-medium transition-all active:scale-95 hover:bg-red-50 flex items-center gap-1 hover:border-red-200">
-            <Trash2 size={14} /> Kosongkan
-          </button>
-          {!inline && onClose && (
-            <button onClick={onClose} className="p-1.5 hover:bg-slate-100 rounded-md transition-all text-slate-500 active:scale-95 ml-2">
-              <X size={20} />
+      <motion.div 
+        initial={{ scale: 0.95, opacity: 0 }} 
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.95, opacity: 0 }}
+        transition={{ duration: 0.2 }}
+        className="bg-white rounded-lg border border-slate-200 shadow-sm w-full max-w-[1100px] max-h-[90vh] overflow-hidden flex flex-col font-sans text-slate-800" 
+        onClick={e => e.stopPropagation()}
+      >
+        <div className="px-5 py-4 border-b border-slate-200 bg-white flex flex-wrap justify-between items-center gap-4 font-semibold">
+          <h3 className="text-lg font-semibold tracking-tight text-slate-800">Database {isMurid ? 'Murid' : 'Pegawai'}</h3>
+          <div className="flex flex-wrap gap-2">
+            <button onClick={() => exportPeopleToExcel(isMurid, data, ctx.sekolah)} className="px-4 py-1.5 border border-slate-200 rounded-md bg-white text-xs text-slate-600 font-medium transition-all active:scale-95 hover:bg-slate-50 flex items-center gap-1 hover:border-slate-300">
+              <Download size={14} /> Ekspor
             </button>
-          )}
+            <button onClick={() => fileRef.current?.click()} className="px-4 py-1.5 border border-slate-200 rounded-md bg-white text-xs text-slate-600 font-medium transition-all active:scale-95 hover:bg-slate-50 cursor-pointer flex items-center gap-1 hover:border-slate-300">
+              <Upload size={14} /> Impor
+            </button>
+            <input type="file" ref={fileRef} accept=".xlsx, .xls" className="hidden" onChange={handleImport} />
+            <button onClick={clearAllData} className="px-4 py-1.5 border border-slate-200 rounded-md bg-white text-xs text-red-600 font-medium transition-all active:scale-95 hover:bg-red-50 flex items-center gap-1 hover:border-red-200">
+              <Trash2 size={14} /> Kosongkan
+            </button>
+          </div>
         </div>
-      </div>
-      
-      <div className={`p-6 overflow-y-auto flex-1 bg-white ${inline ? 'overflow-visible' : ''}`}>
+        
+        <div className="p-6 overflow-y-auto flex-1 bg-white">
           <table className="w-full text-left border-collapse mb-4 border border-slate-200 table-fixed">
             <thead className="bg-slate-50 text-[11px] uppercase font-semibold text-slate-500 border-b border-slate-200">
               {isMurid ? (
@@ -264,37 +267,9 @@ export const ModalDatabase: React.FC<ModalProps> = ({ isOpen = true, onClose, ta
           </button>
         </div>
         
-        <div className="px-5 py-4 border-t border-slate-200 bg-white text-right space-x-2">
-          {inline ? (
-            <span className="text-slate-400 text-xs italic">Perubahan tersimpan otomatis</span>
-          ) : (
-            <button onClick={onClose} className="w-full py-2 bg-blue-500 text-white rounded-md font-medium text-sm hover:bg-blue-600 active:bg-blue-700 active:scale-[0.99] transition-all">Selesai</button>
-          )}
+        <div className="px-5 py-4 border-t border-slate-200 bg-white">
+          <button onClick={onClose} className="w-full py-2 bg-blue-500 text-white rounded-md font-medium text-sm hover:bg-blue-600 active:bg-blue-700 active:scale-[0.99] transition-all">Selesai</button>
         </div>
-    </div>
-  );
-
-  if (inline) {
-    return content;
-  }
-
-  return (
-    <motion.div 
-      initial={{ opacity: 0 }} 
-      animate={{ opacity: 1 }} 
-      exit={{ opacity: 0 }} 
-      transition={{ duration: 0.2 }}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4" 
-      onClick={onClose}
-    >
-      <motion.div 
-        initial={{ scale: 0.95, opacity: 0 }} 
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.95, opacity: 0 }}
-        transition={{ duration: 0.2 }}
-        className="w-full max-w-[1100px]"
-      >
-        {content}
       </motion.div>
     </motion.div>
   );

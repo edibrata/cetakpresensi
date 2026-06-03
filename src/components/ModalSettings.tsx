@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { X, Save, Upload, Download, Plus, Trash2, Calendar, User, Users, Book, CheckCircle, Search, Loader2, Landmark } from 'lucide-react';
+import { X, Save, Upload, Download, Plus, Trash2, Calendar, User, Users, Book, CheckCircle, Search, Loader2 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useAppContext } from '../context/AppContext';
 import { Staff, Student, Holiday, kelasOptions, rombelOptions, bNames } from '../types';
@@ -7,25 +7,23 @@ import { parseHolidaysExcel, exportHolidaysToExcel, exportPeopleToExcel, parsePe
 import { fetchNpsnData } from '../lib/firebase';
 
 interface ModalProps {
-  isOpen?: boolean;
-  onClose?: () => void;
-  inline?: boolean;
+  isOpen: boolean;
+  onClose: () => void;
 }
 
-export const ModalSettings: React.FC<ModalProps> = ({ isOpen = true, onClose, inline = false }) => {
+export const ModalSettings: React.FC<ModalProps> = ({ isOpen, onClose }) => {
   const ctx = useAppContext();
   const [npsnInput, setNpsnInput] = useState(ctx.npsn);
   const [cloudStatus, setCloudStatus] = useState<'idle' | 'loading' | 'found' | 'new'>('idle');
   const [statusMessage, setStatusMessage] = useState('');
 
   useEffect(() => {
-    if (isOpen || inline) {
+    if (isOpen) {
       setNpsnInput(ctx.npsn);
       setCloudStatus('idle');
       setStatusMessage('');
     }
-  }, [isOpen, inline, ctx.npsn]);
-
+  }, [isOpen, ctx.npsn]);
 
   const handleCheckNPSN = async () => {
     if (!npsnInput.trim()) return;
@@ -62,27 +60,35 @@ export const ModalSettings: React.FC<ModalProps> = ({ isOpen = true, onClose, in
     }
   };
 
-  if (!isOpen && !inline) return null;
+  if (!isOpen) return null;
 
-  const content = (
-    <div className={`bg-white rounded-lg border border-slate-200 shadow-sm w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col font-sans text-slate-800 ${inline ? 'h-fit max-h-none shadow-md mx-auto my-4' : ''}`} onClick={e => e.stopPropagation()}>
-      <div className="px-5 py-4 border-b border-slate-200 flex justify-between items-center bg-white rounded-t-lg">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-orange-50 border border-orange-100 flex items-center justify-center text-orange-600">
-            <Landmark size={18} />
-          </div>
+  return (
+    <motion.div 
+      initial={{ opacity: 0 }} 
+      animate={{ opacity: 1 }} 
+      exit={{ opacity: 0 }} 
+      transition={{ duration: 0.2 }}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4" 
+      onClick={onClose}
+    >
+      <motion.div 
+        initial={{ scale: 0.95, opacity: 0 }} 
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.95, opacity: 0 }}
+        transition={{ duration: 0.2 }}
+        className="bg-white rounded-lg border border-slate-200 shadow-sm w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col font-sans text-slate-800" 
+        onClick={e => e.stopPropagation()}
+      >
+        <div className="px-5 py-4 border-b border-slate-200 flex justify-between items-center bg-white">
           <div>
-            <h3 className="text-lg font-semibold tracking-tight text-slate-800">Identitas & Sinkronisasi</h3>
+            <h3 className="text-lg font-semibold tracking-tight text-slate-800">Pengaturan Identitas & Awan</h3>
             <p className="text-slate-500 text-xs mt-1 font-normal">Konfigurasi NPSN, Nama Sekolah dan Pejabat Penandatangan</p>
           </div>
-        </div>
-        {!inline && onClose && (
           <button onClick={onClose} className="p-1.5 hover:bg-slate-100 rounded-md transition-all text-slate-500 active:scale-95">
             <X size={20} />
           </button>
-        )}
-      </div>
-      <div className={`p-8 space-y-8 overflow-y-auto bg-white ${inline ? 'overflow-visible' : ''}`}>
+        </div>
+        <div className="p-8 space-y-8 overflow-y-auto bg-white">
           
           <div className="bg-blue-50 border border-blue-100 p-4 rounded-lg flex flex-col gap-3 transition-colors hover:border-blue-200">
             <div className="flex gap-2 items-center">
@@ -163,34 +169,10 @@ export const ModalSettings: React.FC<ModalProps> = ({ isOpen = true, onClose, in
           )}
         </div>
         <div className="px-5 py-4 border-t border-slate-200 flex gap-3 bg-white">
-          <button onClick={inline ? () => alert("Pengaturan tersimpan otomatis!") : onClose} className="flex-1 py-2 bg-blue-500 text-white rounded-md font-medium text-sm hover:bg-blue-600 active:bg-blue-700 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
-            <Save size={16} /> Simpan
+          <button onClick={onClose} className="flex-1 py-2 bg-blue-500 text-white rounded-md font-medium text-sm hover:bg-blue-600 active:bg-blue-700 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+            <Save size={16} /> Simpan & Tutup
           </button>
         </div>
-    </div>
-  );
-
-  if (inline) {
-    return content;
-  }
-
-  return (
-    <motion.div 
-      initial={{ opacity: 0 }} 
-      animate={{ opacity: 1 }} 
-      exit={{ opacity: 0 }} 
-      transition={{ duration: 0.2 }}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4" 
-      onClick={onClose}
-    >
-      <motion.div 
-        initial={{ scale: 0.95, opacity: 0 }} 
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.95, opacity: 0 }}
-        transition={{ duration: 0.2 }}
-        className="w-full max-w-4xl"
-      >
-        {content}
       </motion.div>
     </motion.div>
   );
