@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { X, Upload, Download, Plus, Trash2, Calendar } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useAppContext } from '../context/AppContext';
@@ -14,20 +14,28 @@ export const ModalLibur: React.FC<ModalProps> = ({ isOpen, onClose }) => {
   const ctx = useAppContext();
   const fileRef = useRef<HTMLInputElement>(null);
   
+  const [localData, setLocalData] = useState<Holiday[]>([]);
+
+  useEffect(() => {
+    if (isOpen) {
+      setLocalData([...ctx.holidayData].sort((a, b) => Number(a.month) - Number(b.month) || String(a.date).split(',')[0].localeCompare(String(b.date).split(',')[0])));
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
-  const data = [...ctx.holidayData].sort((a, b) => Number(a.month) - Number(b.month) || String(a.date).split(',')[0].localeCompare(String(b.date).split(',')[0]));
-
-  const addRow = () => ctx.updateHolidayData([...ctx.holidayData, { month: ctx.bulan, date: '', desc: '' }]);
+  const addRow = () => setLocalData([...localData, { month: ctx.bulan, date: '', desc: '' }]);
+  
   const removeRow = (idx: number) => {
-    const next = [...data];
+    const next = [...localData];
     next.splice(idx, 1);
-    ctx.updateHolidayData(next);
+    setLocalData(next);
   };
+  
   const updateRow = (idx: number, field: keyof Holiday, value: any) => {
-    const next = [...data];
+    const next = [...localData];
     next[idx] = { ...next[idx], [field]: value };
-    ctx.updateHolidayData(next);
+    setLocalData(next);
   };
 
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -35,12 +43,18 @@ export const ModalLibur: React.FC<ModalProps> = ({ isOpen, onClose }) => {
     if (!file) return;
     try {
       const imported = await parseHolidaysExcel(file);
-      ctx.updateHolidayData([...ctx.holidayData, ...imported]);
+      setLocalData([...localData, ...imported]);
     } catch (err) {
       alert("Gagal mengimpor file.");
     } finally {
       if (fileRef.current) fileRef.current.value = '';
     }
+  };
+
+  const handleSave = () => {
+    const sorted = [...localData].sort((a, b) => Number(a.month) - Number(b.month) || String(a.date).split(',')[0].localeCompare(String(b.date).split(',')[0]));
+    ctx.updateHolidayData(sorted);
+    onClose();
   };
 
   return (
@@ -65,7 +79,7 @@ export const ModalLibur: React.FC<ModalProps> = ({ isOpen, onClose }) => {
             <Calendar size={18} className="text-slate-500" /> Master Hari Libur Tahunan
           </h3>
           <div className="flex gap-2">
-            <button onClick={() => exportHolidaysToExcel(ctx.holidayData, ctx.sekolah)} className="p-1.5 rounded-md hover:bg-slate-100 transition-all text-slate-500 border border-transparent active:scale-95 hover:text-slate-700" title="Ekspor Libur ke Excel">
+            <button onClick={() => exportHolidaysToExcel(localData, ctx.sekolah)} className="p-1.5 rounded-md hover:bg-slate-100 transition-all text-slate-500 border border-transparent active:scale-95 hover:text-slate-700" title="Ekspor Libur ke Excel">
               <Download size={18} />
             </button>
             <button onClick={() => fileRef.current?.click()} className="p-1.5 rounded-md hover:bg-slate-100 transition-all text-slate-500 border border-transparent active:scale-95 hover:text-slate-700" title="Impor Libur dari Excel">
@@ -85,10 +99,10 @@ export const ModalLibur: React.FC<ModalProps> = ({ isOpen, onClose }) => {
               </tr>
             </thead>
             <tbody>
-              {data.length === 0 ? (
+              {localData.length === 0 ? (
                 <tr><td colSpan={4} className="p-4 text-center text-sm text-slate-500">Belum ada hari libur.</td></tr>
               ) : (
-                data.map((h, i) => (
+                localData.map((h, i) => (
                   <tr key={i} className="border-b border-slate-100 last:border-b-0 transition-colors hover:bg-slate-50/50">
                     <td className="p-1 border-r border-slate-200">
                       <select className="w-full bg-transparent p-2 text-sm outline-none transition-colors hover:bg-white focus:bg-white rounded" value={h.month} onChange={e => updateRow(i, 'month', Number(e.target.value))}>
@@ -116,8 +130,8 @@ export const ModalLibur: React.FC<ModalProps> = ({ isOpen, onClose }) => {
           </button>
         </div>
         <div className="px-5 py-4 border-t border-slate-200 bg-white">
-          <button onClick={onClose} className="w-full py-2 bg-blue-500 text-white rounded-md font-medium text-sm hover:bg-blue-600 active:bg-blue-700 active:scale-[0.99] transition-all">
-            Selesai
+          <button onClick={handleSave} className="w-full py-2 bg-blue-500 text-white rounded-md font-medium text-sm hover:bg-blue-600 active:bg-blue-700 active:scale-[0.99] transition-all">
+            Simpan & Selesai
           </button>
         </div>
       </motion.div>
