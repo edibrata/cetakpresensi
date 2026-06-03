@@ -6,6 +6,7 @@ import { MapelInput } from './MapelInput';
 import { Staff, Student, kelasOptions, rombelOptions } from '../types';
 import { exportPeopleToExcel, parsePeopleExcel } from '../utils/excel';
 import { buildTugasString } from '../utils/helpers';
+import { useDialog } from '../context/DialogContext';
 
 interface ModalProps {
   isOpen: boolean;
@@ -15,6 +16,7 @@ interface ModalProps {
 
 export const ModalDatabase: React.FC<ModalProps> = ({ isOpen, onClose, target }) => {
   const ctx = useAppContext();
+  const dialog = useDialog();
   const fileRef = useRef<HTMLInputElement>(null);
   const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
   const [draggedIdx, setDraggedIdx] = useState<number | null>(null);
@@ -58,21 +60,33 @@ export const ModalDatabase: React.FC<ModalProps> = ({ isOpen, onClose, target })
   };
 
   const clearAllData = () => {
-    if (confirm('Hapus semua data dalam database ini?')) {
-      if (isMurid) ctx.updateStudentData([]);
-      else ctx.updateStaffData([]);
-      setSelectedRows(new Set());
-    }
+    dialog.showConfirm(
+      'Konfirmasi Kosongkan',
+      'Hapus semua data dalam database ini?',
+      () => {
+        if (isMurid) ctx.updateStudentData([]);
+        else ctx.updateStaffData([]);
+        setSelectedRows(new Set());
+      },
+      'Ya, Kosongkan'
+    );
   };
 
   const deleteSelected = () => {
-    if (selectedRows.size > 0 && confirm(`Hapus ${selectedRows.size} data terpilih?`)) {
-      if (isMurid) {
-        ctx.updateStudentData(ctx.studentData.filter((_, i) => !selectedRows.has(i)));
-      } else {
-        ctx.updateStaffData(ctx.staffData.filter((_, i) => !selectedRows.has(i)));
-      }
-      setSelectedRows(new Set());
+    if (selectedRows.size > 0) {
+      dialog.showConfirm(
+        'Konfirmasi Hapus',
+        `Hapus ${selectedRows.size} data terpilih?`,
+        () => {
+          if (isMurid) {
+            ctx.updateStudentData(ctx.studentData.filter((_, i) => !selectedRows.has(i)));
+          } else {
+            ctx.updateStaffData(ctx.staffData.filter((_, i) => !selectedRows.has(i)));
+          }
+          setSelectedRows(new Set());
+        },
+        'Ya, Hapus'
+      );
     }
   };
 
@@ -190,7 +204,7 @@ export const ModalDatabase: React.FC<ModalProps> = ({ isOpen, onClose, target })
       if (isMurid) ctx.updateStudentData([...ctx.studentData, ...imported]);
       else ctx.updateStaffData([...ctx.staffData, ...imported]);
     } catch (err) {
-      alert('Gagal impor file.');
+      dialog.showAlert("Error", 'Gagal impor file.');
     } finally {
       if (fileRef.current) fileRef.current.value = '';
     }

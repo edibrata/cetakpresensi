@@ -8,8 +8,11 @@ import { ModalLibur } from './components/ModalLibur';
 import { ModalDatabase } from './components/ModalDatabase';
 import { bNames } from './types';
 
+import { DialogProvider, useDialog } from './context/DialogContext';
+
 const AppContent = () => {
   const ctx = useAppContext();
+  const dialog = useDialog();
   
   const [activeModal, setActiveModal] = useState<string | null>(null);
   const [dataTarget, setDataTarget] = useState<'pegawai' | 'murid'>('pegawai');
@@ -120,7 +123,10 @@ const AppContent = () => {
     }
 
     if (targets.length === 0) {
-      alert(ctx.mode === 'murid' ? "Tidak ada data kelas/rombel yang valid di database untuk dicetak masal." : "Tidak ada target bulan untuk dicetak massal.");
+      dialog.showAlert(
+        "Peringatan Cetak Massal",
+        ctx.mode === 'murid' ? "Tidak ada data kelas/rombel yang valid di database untuk dicetak masal." : "Tidak ada target bulan untuk dicetak massal."
+      );
       return;
     }
 
@@ -220,8 +226,10 @@ const AppContent = () => {
 
 export default function App() {
   return (
-    <AppProvider>
-      <AppContent />
-    </AppProvider>
+    <DialogProvider>
+      <AppProvider>
+        <AppContent />
+      </AppProvider>
+    </DialogProvider>
   );
 }

@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState, ReactNode, useRe
 import { AppState, Holiday, Staff, Student, Mode, SubModeMurid } from '../types';
 import { parseJabatan } from '../utils/helpers';
 import { saveNpsnData } from '../lib/firebase';
+import { useDialog } from './DialogContext';
 
 const STORAGE_KEY = 'absensi_f4_vSUPREME_FINAL_V12_LOCKED_FIXED_V4_MASTER_V_SUBMODE_V3';
 
@@ -48,6 +49,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [state, setState] = useState<AppState>(defaultState);
   const [isLoaded, setIsLoaded] = useState(false);
   const [syncStatus, setSyncStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const dialog = useDialog();
 
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
@@ -97,14 +99,14 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         await saveNpsnData(state.npsn.trim(), stateToSave);
         setSyncStatus('saved');
         setTimeout(() => setSyncStatus('idle'), 3000);
-        if (!silent) alert('Data berhasil disimpan ke cloud Firebase!');
+        if (!silent) dialog.showAlert("Berhasil", 'Data berhasil disimpan ke cloud Firebase!');
       } catch (err) {
         console.error("Cloud sync failed:", err);
         setSyncStatus('error');
-        if (!silent) alert('Gagal menyimpan ke cloud: ' + (err as Error).message);
+        if (!silent) dialog.showAlert("Error", 'Gagal menyimpan ke cloud: ' + (err as Error).message);
       }
     } else {
-      if (!silent) alert('NPSN tidak ditemukan. Data tidak dapat disimpan ke cloud.');
+      if (!silent) dialog.showAlert("Peringatan", 'NPSN tidak ditemukan. Data tidak dapat disimpan ke cloud.');
     }
   };
 

@@ -4,6 +4,7 @@ import { motion } from 'motion/react';
 import { useAppContext } from '../context/AppContext';
 import { bNames, Holiday } from '../types';
 import { parseHolidaysExcel, exportHolidaysToExcel } from '../utils/excel';
+import { useDialog } from '../context/DialogContext';
 
 interface ModalProps {
   isOpen: boolean;
@@ -12,6 +13,7 @@ interface ModalProps {
 
 export const ModalLibur: React.FC<ModalProps> = ({ isOpen, onClose }) => {
   const ctx = useAppContext();
+  const dialog = useDialog();
   const fileRef = useRef<HTMLInputElement>(null);
   
   const [localData, setLocalData] = useState<Holiday[]>([]);
@@ -51,7 +53,7 @@ export const ModalLibur: React.FC<ModalProps> = ({ isOpen, onClose }) => {
       const imported = await parseHolidaysExcel(file);
       setLocalData([...localData, ...imported]);
     } catch (err) {
-      alert("Gagal mengimpor file.");
+      dialog.showAlert("Error", "Gagal mengimpor file.");
     } finally {
       if (fileRef.current) fileRef.current.value = '';
     }
@@ -64,9 +66,16 @@ export const ModalLibur: React.FC<ModalProps> = ({ isOpen, onClose }) => {
   };
 
   const deleteSelected = () => {
-    if (selectedRows.size > 0 && confirm(`Hapus ${selectedRows.size} data libur terpilih?`)) {
-      setLocalData(localData.filter((_, i) => !selectedRows.has(i)));
-      setSelectedRows(new Set());
+    if (selectedRows.size > 0) {
+      dialog.showConfirm(
+        "Konfirmasi Hapus",
+        `Hapus ${selectedRows.size} data libur terpilih?`,
+        () => {
+          setLocalData(localData.filter((_, i) => !selectedRows.has(i)));
+          setSelectedRows(new Set());
+        },
+        "Ya, Hapus"
+      );
     }
   };
 

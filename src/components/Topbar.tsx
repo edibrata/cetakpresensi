@@ -5,6 +5,7 @@ import { MapelInput } from './MapelInput';
 import { bNames, kelasOptions, rombelOptions } from '../types';
 import { getTimestamp } from '../utils/excel';
 import { Tooltip } from './Tooltip';
+import { useDialog } from '../context/DialogContext';
 
 interface TopbarProps {
   onOpenModal: (id: string) => void;
@@ -14,6 +15,7 @@ interface TopbarProps {
 
 export const Topbar: React.FC<TopbarProps> = ({ onOpenModal, onOpenDataModal, onBulkPrint }) => {
   const ctx = useAppContext();
+  const dialog = useDialog();
   const restoreInputRef = useRef<HTMLInputElement>(null);
   
   // Tab state limits toolbar options dynamically
@@ -37,7 +39,7 @@ export const Topbar: React.FC<TopbarProps> = ({ onOpenModal, onOpenDataModal, on
         const data = JSON.parse(e.target?.result as string);
         ctx.restoreState({ ...data, npsn: ctx.npsn });
       } catch (err) {
-        alert("File backup tidak valid!");
+        dialog.showAlert("Error", "File backup tidak valid!");
       }
     };
     reader.readAsText(file);
@@ -60,9 +62,14 @@ export const Topbar: React.FC<TopbarProps> = ({ onOpenModal, onOpenDataModal, on
   };
 
   const handleReset = () => {
-    if (window.confirm("Apakah Anda yakin ingin mereset semua data pada NPSN ini? Aksi ini tidak dapat dibatalkan.")) {
-      ctx.restoreState({ ...defaultState, npsn: ctx.npsn });
-    }
+    dialog.showConfirm(
+      "Konfirmasi Reset",
+      "Apakah Anda yakin ingin mereset semua data pada NPSN ini? Aksi ini tidak dapat dibatalkan.",
+      () => {
+        ctx.restoreState({ ...defaultState, npsn: ctx.npsn });
+      },
+      "Ya, Reset Data"
+    );
   };
 
   const isMapel = activeTab === 'murid' && ctx.subModeMurid === 'mapel';
