@@ -1,0 +1,197 @@
+@import "tailwindcss";
+
+:root {
+  --row-height-pegawai: 35px; 
+  --row-height-murid: 15px;
+  --font-main: 10pt;
+  --font-main-murid: 9.5pt;
+  --font-name: 11pt;
+}
+
+body {
+  background-color: #F1F5F9;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  color: #1E293B;
+}
+
+@media print {
+  @page {
+      size: 330mm 215mm; /* F4 Landscape */
+      margin: 12mm 12mm 12mm 12mm;
+  }
+  
+  html, body {
+      height: auto !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      background: white !important;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+  }
+
+  .no-print, .modal-overlay {
+      display: none !important;
+  }
+
+  .f4-paper {
+      width: 100% !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      box-shadow: none !important;
+      display: block !important;
+      height: auto !important;
+      min-height: 0 !important;
+      overflow: visible !important;
+  }
+
+  table {
+      width: calc(100% - 1mm) !important;
+      border-collapse: collapse !important;
+      table-layout: fixed !important;
+      border: 0.75pt solid black !important;
+      margin-right: auto !important; 
+  }
+
+  th, td {
+      border: 0.75pt solid black !important;
+      color: black !important;
+  }
+
+  th:last-child, td:last-child {
+      border-right: 0.75pt solid black !important;
+  }
+
+  #footerMurid .border-black {
+      border: 0.75pt solid black !important;
+      box-shadow: none !important;
+  }
+  
+  #footerMurid .bg-gray-100 {
+      border-top: none !important;
+      border-left: none !important;
+      border-right: none !important;
+      border-bottom: 0.75pt solid black !important;
+  }
+  
+  #footerMurid .text-slate-600 {
+      white-space: nowrap !important;
+      display: block !important;
+      font-size: 6.5pt !important;
+      line-height: 1.2 !important;
+  }
+
+  .page-break {
+      page-break-after: always !important;
+      break-after: page !important;
+  }
+  
+  body.is-bulk-printing > *:not(#bulkPrintContainer) {
+      display: none !important;
+  }
+  
+  body.is-bulk-printing #bulkPrintContainer {
+      display: block !important;
+  }
+}
+
+.f4-paper {
+  font-family: 'Times New Roman', serif;
+  width: 330mm;
+  min-height: 215mm;
+  padding: 15mm;
+  margin: 20px auto;
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  position: relative;
+  box-sizing: border-box;
+}
+
+table { 
+  border-collapse: collapse; 
+  width: 100%; 
+  border: 1px solid black; 
+  table-layout: fixed;
+  box-sizing: border-box;
+}
+
+th, td { 
+  border: 1px solid black; 
+  text-align: center; 
+  vertical-align: middle; 
+  font-family: 'Times New Roman', serif;
+  box-sizing: border-box;
+}
+
+.pegawai-mode th, .pegawai-mode td { 
+  font-size: var(--font-main) !important; 
+  height: var(--row-height-pegawai) !important; 
+  padding: 0 2px !important;
+}
+
+.murid-mode td { 
+  font-size: var(--font-main-murid) !important; 
+  height: var(--row-height-murid) !important; 
+  padding: 0 1px !important;
+}
+
+.murid-mode th { 
+  font-size: var(--font-main-murid) !important; 
+  padding: 0 1px !important;
+}
+
+.murid-mode td:nth-child(2), 
+.pegawai-mode td:nth-child(2) { 
+  font-weight: normal;
+  text-align: justify !important;
+}
+
+.holiday { background-color: #f3f4f6 !important; }
+.sunday { background-color: #fee2e2 !important; }
+
+.vertical-text-wrapper {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.vertical-text {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  white-space: nowrap;
+  font-weight: bold;
+  font-size: 7.5pt;
+  letter-spacing: 0.2px;
+  text-transform: uppercase;
+}
+
+.shrink-to-fit {
+  white-space: nowrap;
+  overflow: hidden;
+  display: inline-block;
+  vertical-align: middle;
+  max-width: 100%;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  height: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.signature-section { 
+  page-break-inside: avoid !important; 
+  margin-top: 5mm !important; 
+}
