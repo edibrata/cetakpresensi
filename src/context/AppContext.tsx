@@ -5,7 +5,7 @@ import { saveNpsnData } from '../lib/firebase';
 
 const STORAGE_KEY = 'absensi_f4_vSUPREME_FINAL_V12_LOCKED_FIXED_V4_MASTER_V_SUBMODE_V3';
 
-const defaultState: AppState = {
+export const defaultState: AppState = {
   npsn: '',
   mode: 'pegawai',
   subModeMurid: 'kelas',
@@ -75,26 +75,16 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       if (state.npsn && state.npsn.trim() !== '') {
         if (debounceRef.current) clearTimeout(debounceRef.current);
         debounceRef.current = setTimeout(() => {
-          saveNpsnData(state.npsn.trim(), {
-            sekolah: state.sekolah,
-            kota: state.kota,
-            tglManual: state.tglManual,
-            kepsek: state.kepsek,
-            nip: state.nip,
-            wali: state.wali,
-            nipWali: state.nipWali,
-            staffData: state.staffData,
-            studentData: state.studentData,
-            holidayData: state.holidayData
-          }).catch(err => console.error("Cloud sync failed:", err));
+          const { npsn, ...stateToSave } = state;
+          saveNpsnData(state.npsn.trim(), stateToSave).catch(err => console.error("Cloud sync failed:", err));
         }, 1500); // 1.5s debounce
       }
     }
   }, [state, isLoaded]);
 
   const syncPejabatData = () => {
-    let foundKepsek = { nama: "", nip: "" };
-    let foundWali = { nama: "", nip: "" };
+    let foundKepsek: { nama: string; nip: string } | null = null;
+    let foundWali: { nama: string; nip: string } | null = null;
     
     const listKepsek = state.staffData.filter((s: Staff) => {
       const p = s.jabatan.primary;
@@ -131,13 +121,18 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       }
     }
 
-    setState(prev => ({
-      ...prev,
-      kepsek: foundKepsek.nama,
-      nip: foundKepsek.nip,
-      wali: foundWali.nama,
-      nipWali: foundWali.nip
-    }));
+    setState(prev => {
+      const next = { ...prev };
+      if (foundKepsek) {
+        next.kepsek = foundKepsek.nama;
+        next.nip = foundKepsek.nip;
+      }
+      if (foundWali) {
+        next.wali = foundWali.nama;
+        next.nipWali = foundWali.nip;
+      }
+      return next;
+    });
   };
 
   const setField = (field: keyof AppState, value: any) => {

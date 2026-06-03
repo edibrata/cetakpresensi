@@ -32,27 +32,66 @@ export const ModalSettings: React.FC<ModalProps> = ({ isOpen, onClose }) => {
     setStatusMessage('Mencari data...');
     try {
       const result = await fetchNpsnData(npsnInput.trim());
-      ctx.setField('npsn', npsnInput.trim());
       
       if (result.exists && result.data) {
         setCloudStatus('found');
         setStatusMessage('Data tersinkronisasi.');
         
         const d = result.data;
-        if (d.sekolah) ctx.setField('sekolah', d.sekolah);
-        if (d.kota) ctx.setField('kota', d.kota);
-        if (d.kepsek) ctx.setField('kepsek', d.kepsek);
-        if (d.nip) ctx.setField('nip', d.nip);
-        if (d.wali) ctx.setField('wali', d.wali);
-        if (d.nipWali) ctx.setField('nipWali', d.nipWali);
-        if (d.tglManual) ctx.setField('tglManual', d.tglManual);
-        if (d.staffData) ctx.updateStaffData(d.staffData);
-        if (d.studentData) ctx.updateStudentData(d.studentData);
-        if (d.holidayData) ctx.updateHolidayData(d.holidayData);
+        const newState = { ...ctx };
+        newState.npsn = npsnInput.trim();
         
+        if (d.sekolah !== undefined) newState.sekolah = d.sekolah;
+        if (d.kota !== undefined) newState.kota = d.kota;
+        if (d.kepsek !== undefined) newState.kepsek = d.kepsek;
+        if (d.nip !== undefined) newState.nip = d.nip;
+        if (d.wali !== undefined) newState.wali = d.wali;
+        if (d.nipWali !== undefined) newState.nipWali = d.nipWali;
+        if (d.tglManual !== undefined) newState.tglManual = d.tglManual;
+        if (d.staffData !== undefined) newState.staffData = d.staffData;
+        if (d.studentData !== undefined) newState.studentData = d.studentData;
+        if (d.holidayData !== undefined) newState.holidayData = d.holidayData;
+        if (d.mode !== undefined) newState.mode = d.mode;
+        if (d.subModeMurid !== undefined) newState.subModeMurid = d.subModeMurid;
+        if (d.bulan !== undefined) newState.bulan = d.bulan;
+        if (d.tahun !== undefined) newState.tahun = d.tahun;
+        if (d.kelas !== undefined) newState.kelas = d.kelas;
+        if (d.rombel !== undefined) newState.rombel = d.rombel;
+        if (d.namaMapel !== undefined) newState.namaMapel = d.namaMapel;
+        if (d.tahunAjaranMapel !== undefined) newState.tahunAjaranMapel = d.tahunAjaranMapel;
+        if (d.semesterMapel !== undefined) newState.semesterMapel = d.semesterMapel;
+        if (d.meetingCount !== undefined) newState.meetingCount = d.meetingCount;
+        
+        ctx.restoreState(newState);
       } else {
         setCloudStatus('new');
-        setStatusMessage('NPSN baru siap digunakan.');
+        setStatusMessage('NPSN baru siap digunakan. Ruang kerja telah direset.');
+        
+        // Reset the workspace for a new NPSN, so the user doesn't accidentally save old data to the new NPSN
+        ctx.restoreState({
+          ...ctx, // Keep existing functions
+          npsn: npsnInput.trim(),
+          mode: 'pegawai',
+          subModeMurid: 'kelas',
+          sekolah: '',
+          kota: '',
+          kepsek: '',
+          nip: '',
+          wali: '',
+          nipWali: '',
+          tglManual: '',
+          bulan: new Date().getMonth(),
+          tahun: new Date().getFullYear(),
+          kelas: '',
+          rombel: '',
+          namaMapel: '',
+          tahunAjaranMapel: '',
+          semesterMapel: 'I (Ganjil)',
+          meetingCount: 0,
+          staffData: [],
+          studentData: [],
+          holidayData: []
+        });
       }
     } catch (e) {
       setCloudStatus('idle');

@@ -15,10 +15,12 @@ export const ModalLibur: React.FC<ModalProps> = ({ isOpen, onClose }) => {
   const fileRef = useRef<HTMLInputElement>(null);
   
   const [localData, setLocalData] = useState<Holiday[]>([]);
+  const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
 
   useEffect(() => {
     if (isOpen) {
       setLocalData([...ctx.holidayData].sort((a, b) => Number(a.month) - Number(b.month) || String(a.date).split(',')[0].localeCompare(String(b.date).split(',')[0])));
+      setSelectedRows(new Set());
     }
   }, [isOpen]);
 
@@ -30,6 +32,10 @@ export const ModalLibur: React.FC<ModalProps> = ({ isOpen, onClose }) => {
     const next = [...localData];
     next.splice(idx, 1);
     setLocalData(next);
+    
+    const nextSelected = new Set(selectedRows);
+    nextSelected.delete(idx);
+    setSelectedRows(nextSelected);
   };
   
   const updateRow = (idx: number, field: keyof Holiday, value: any) => {
@@ -57,6 +63,25 @@ export const ModalLibur: React.FC<ModalProps> = ({ isOpen, onClose }) => {
     onClose();
   };
 
+  const deleteSelected = () => {
+    if (selectedRows.size > 0 && confirm(`Hapus ${selectedRows.size} data libur terpilih?`)) {
+      setLocalData(localData.filter((_, i) => !selectedRows.has(i)));
+      setSelectedRows(new Set());
+    }
+  };
+
+  const toggleRowChecked = (idx: number) => {
+    const next = new Set(selectedRows);
+    if (next.has(idx)) next.delete(idx);
+    else next.add(idx);
+    setSelectedRows(next);
+  };
+
+  const toggleAllRows = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.checked) setSelectedRows(new Set(localData.map((_, i) => i)));
+    else setSelectedRows(new Set());
+  };
+
   return (
     <motion.div 
       initial={{ opacity: 0 }} 
@@ -74,15 +99,20 @@ export const ModalLibur: React.FC<ModalProps> = ({ isOpen, onClose }) => {
         className="bg-white rounded-lg border border-slate-200 shadow-sm w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col font-sans text-slate-800" 
         onClick={e => e.stopPropagation()}
       >
-        <div className="px-5 py-4 border-b border-slate-200 flex justify-between items-center bg-white font-semibold">
-          <h3 className="text-lg font-semibold tracking-tight text-slate-800 flex items-center gap-2">
+        <div className="px-5 py-4 border-b border-slate-200 flex justify-between items-center bg-white font-semibold flex-wrap gap-2">
+          <h3 className="text-lg font-semibold tracking-tight text-slate-800 flex items-center gap-2 w-full md:w-auto">
             <Calendar size={18} className="text-slate-500" /> Master Hari Libur Tahunan
           </h3>
           <div className="flex gap-2">
-            <button onClick={() => exportHolidaysToExcel(localData, ctx.sekolah)} className="p-1.5 rounded-md hover:bg-slate-100 transition-all text-slate-500 border border-transparent active:scale-95 hover:text-slate-700" title="Ekspor Libur ke Excel">
+            {selectedRows.size > 0 && (
+              <button onClick={deleteSelected} className="px-3 py-1.5 border border-red-200 rounded-md bg-red-50 text-xs text-red-600 font-medium transition-all active:scale-95 hover:bg-red-100 flex items-center gap-1">
+                <Trash2 size={14} /> Hapus {selectedRows.size} Terpilih
+              </button>
+            )}
+            <button onClick={() => exportHolidaysToExcel(localData, ctx.sekolah)} className="p-1.5 rounded-md hover:bg-slate-100 transition-all text-slate-500 border border-transparent active:scale-95 hover:text-slate-700 bg-slate-50" title="Ekspor Libur ke Excel">
               <Download size={18} />
             </button>
-            <button onClick={() => fileRef.current?.click()} className="p-1.5 rounded-md hover:bg-slate-100 transition-all text-slate-500 border border-transparent active:scale-95 hover:text-slate-700" title="Impor Libur dari Excel">
+            <button onClick={() => fileRef.current?.click()} className="p-1.5 rounded-md hover:bg-slate-100 transition-all text-slate-500 border border-transparent active:scale-95 hover:text-slate-700 bg-slate-50" title="Impor Libur dari Excel">
               <Upload size={18} />
             </button>
             <input type="file" ref={fileRef} className="hidden" accept=".xlsx, .xls" onChange={handleImport} />
@@ -92,10 +122,12 @@ export const ModalLibur: React.FC<ModalProps> = ({ isOpen, onClose }) => {
           <table className="w-full text-left border-collapse mb-4 border border-slate-200 table-fixed">
             <thead>
               <tr className="bg-slate-50 text-[11px] uppercase font-semibold text-slate-500 border-b border-slate-200">
+                <th className="p-3 border-r border-slate-200 w-12 text-center text-slate-400">
+                  <input type="checkbox" className="w-3.5 h-3.5 cursor-pointer" checked={selectedRows.size === localData.length && localData.length > 0} onChange={toggleAllRows} />
+                </th>
                 <th className="p-3 border-r border-slate-200 w-40">Bulan</th>
                 <th className="p-3 border-r border-slate-200 w-32">Tanggal (Angka)</th>
                 <th className="p-3 border-r border-slate-200">Keterangan Hari Libur</th>
-                <th className="p-3 w-16 text-center">Aksi</th>
               </tr>
             </thead>
             <tbody>
@@ -103,7 +135,10 @@ export const ModalLibur: React.FC<ModalProps> = ({ isOpen, onClose }) => {
                 <tr><td colSpan={4} className="p-4 text-center text-sm text-slate-500">Belum ada hari libur.</td></tr>
               ) : (
                 localData.map((h, i) => (
-                  <tr key={i} className="border-b border-slate-100 last:border-b-0 transition-colors hover:bg-slate-50/50">
+                  <tr key={i} className={`border-b border-slate-100 last:border-b-0 transition-colors ${selectedRows.has(i) ? 'bg-blue-50/50' : 'hover:bg-slate-50/50'}`}>
+                    <td className="p-1 border-r border-slate-200 text-center">
+                      <input type="checkbox" className="w-3.5 h-3.5 cursor-pointer" checked={selectedRows.has(i)} onChange={() => toggleRowChecked(i)} />
+                    </td>
                     <td className="p-1 border-r border-slate-200">
                       <select className="w-full bg-transparent p-2 text-sm outline-none transition-colors hover:bg-white focus:bg-white rounded" value={h.month} onChange={e => updateRow(i, 'month', Number(e.target.value))}>
                         {bNames.map((name, idx) => <option key={idx} value={idx}>{name}</option>)}
@@ -114,11 +149,6 @@ export const ModalLibur: React.FC<ModalProps> = ({ isOpen, onClose }) => {
                     </td>
                     <td className="p-1 border-r border-slate-200">
                       <input type="text" className="w-full p-2 bg-transparent border border-transparent rounded text-sm outline-none transition-colors hover:bg-white focus:bg-white focus:border-blue-300" value={h.desc} placeholder="Keterangan Libur" onChange={e => updateRow(i, 'desc', e.target.value)} />
-                    </td>
-                    <td className="p-1 text-center">
-                      <button onClick={() => removeRow(i)} className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-md transition-all active:scale-90">
-                        <Trash2 size={16} />
-                      </button>
                     </td>
                   </tr>
                 ))
@@ -138,3 +168,4 @@ export const ModalLibur: React.FC<ModalProps> = ({ isOpen, onClose }) => {
     </motion.div>
   );
 };
+
