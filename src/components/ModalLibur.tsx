@@ -5,6 +5,7 @@ import { useAppContext } from '../context/AppContext';
 import { bNames, Holiday } from '../types';
 import { parseHolidaysExcel, exportHolidaysToExcel } from '../utils/excel';
 import { useDialog } from '../context/DialogContext';
+import { Tooltip } from './Tooltip';
 
 interface ModalProps {
   isOpen: boolean;
@@ -118,12 +119,16 @@ export const ModalLibur: React.FC<ModalProps> = ({ isOpen, onClose }) => {
                 <Trash2 size={14} /> Hapus {selectedRows.size} Terpilih
               </button>
             )}
-            <button onClick={() => exportHolidaysToExcel(localData, ctx.sekolah)} className="p-1.5 rounded-md hover:bg-slate-100 transition-all text-slate-500 border border-transparent active:scale-95 hover:text-slate-700 bg-slate-50" title="Ekspor Libur ke Excel">
-              <Download size={18} />
-            </button>
-            <button onClick={() => fileRef.current?.click()} className="p-1.5 rounded-md hover:bg-slate-100 transition-all text-slate-500 border border-transparent active:scale-95 hover:text-slate-700 bg-slate-50" title="Impor Libur dari Excel">
-              <Upload size={18} />
-            </button>
+            <Tooltip content="Ekspor Libur ke Excel">
+              <button onClick={() => exportHolidaysToExcel(localData, ctx.sekolah)} className="p-1.5 rounded-md hover:bg-slate-100 transition-all text-slate-500 border border-transparent active:scale-95 hover:text-slate-700 bg-slate-50">
+                <Download size={18} />
+              </button>
+            </Tooltip>
+            <Tooltip content="Impor Libur dari Excel">
+              <button onClick={() => fileRef.current?.click()} className="p-1.5 rounded-md hover:bg-slate-100 transition-all text-slate-500 border border-transparent active:scale-95 hover:text-slate-700 bg-slate-50">
+                <Upload size={18} />
+              </button>
+            </Tooltip>
             <input type="file" ref={fileRef} className="hidden" accept=".xlsx, .xls" onChange={handleImport} />
           </div>
         </div>

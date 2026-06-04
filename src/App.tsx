@@ -3,6 +3,7 @@ import { AnimatePresence } from 'motion/react';
 import { AppProvider, useAppContext } from './context/AppContext';
 import { Topbar } from './components/Topbar';
 import { PrintableSheet } from './components/PrintableSheet';
+import { Dashboard } from './components/Dashboard';
 import { ModalSettings } from './components/ModalSettings';
 import { ModalLibur } from './components/ModalLibur';
 import { ModalDatabase } from './components/ModalDatabase';
@@ -14,6 +15,7 @@ const AppContent = () => {
   const ctx = useAppContext();
   const dialog = useDialog();
   
+  const [activeTab, setActiveTab] = useState<'pengaturan' | 'pegawai' | 'murid'>('pengaturan');
   const [activeModal, setActiveModal] = useState<string | null>(null);
   const [dataTarget, setDataTarget] = useState<'pegawai' | 'murid'>('pegawai');
   
@@ -210,9 +212,11 @@ const AppContent = () => {
         onOpenModal={handleOpenModal} 
         onOpenDataModal={handleOpenDataModal} 
         onBulkPrint={handleBulkPrint}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
       />
       
-      {!isBulkPrinting && <PrintableSheet />}
+      {!isBulkPrinting && (activeTab === 'pengaturan' ? <Dashboard onOpenModal={handleOpenModal} onOpenDataModal={handleOpenDataModal} /> : <PrintableSheet />)}
       {renderBulkPages()}
 
       <AnimatePresence>

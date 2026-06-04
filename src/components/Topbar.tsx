@@ -11,17 +11,14 @@ interface TopbarProps {
   onOpenModal: (id: string) => void;
   onOpenDataModal: (target: 'pegawai' | 'murid') => void;
   onBulkPrint: () => void;
+  activeTab: 'pengaturan' | 'pegawai' | 'murid';
+  setActiveTab: (tab: 'pengaturan' | 'pegawai' | 'murid') => void;
 }
 
-export const Topbar: React.FC<TopbarProps> = ({ onOpenModal, onOpenDataModal, onBulkPrint }) => {
+export const Topbar: React.FC<TopbarProps> = ({ onOpenModal, onOpenDataModal, onBulkPrint, activeTab, setActiveTab }) => {
   const ctx = useAppContext();
   const dialog = useDialog();
   const restoreInputRef = useRef<HTMLInputElement>(null);
-  
-  // Tab state limits toolbar options dynamically
-  const [activeTab, setActiveTab] = useState<'pengaturan' | 'pegawai' | 'murid'>(
-    ctx.mode as any || 'pegawai'
-  );
 
   useEffect(() => {
     if (ctx.mode !== activeTab && (ctx.mode === 'pegawai' || ctx.mode === 'murid') && activeTab !== 'pengaturan') {
@@ -123,21 +120,22 @@ export const Topbar: React.FC<TopbarProps> = ({ onOpenModal, onOpenDataModal, on
         {/* --- PENGATURAN SUB-MENU --- */}
         {activeTab === 'pengaturan' && (
           <div className="flex flex-row flex-wrap md:flex-nowrap items-center gap-2 flex-1 animate-fade-in">
-            <Tooltip content="Identitas Sekolah">
-              <button onClick={() => onOpenModal('modalSettings')} className="flex items-center justify-center p-1.5 rounded-md border border-slate-200 bg-white text-slate-600 transition-all hover:bg-slate-50 active:scale-95 shadow-sm">
-                <Landmark size={14} className="text-blue-600" />
-              </button>
-            </Tooltip>
-            <Tooltip content="Data Pegawai">
-              <button onClick={() => onOpenDataModal('pegawai')} className="flex items-center justify-center p-1.5 rounded-md border border-slate-200 bg-white text-slate-600 transition-all hover:bg-slate-50 active:scale-95 shadow-sm">
-                <Users size={14} className="text-emerald-600" />
-              </button>
-            </Tooltip>
-            <Tooltip content="Data Murid">
-              <button onClick={() => onOpenDataModal('murid')} className="flex items-center justify-center p-1.5 rounded-md border border-slate-200 bg-white text-slate-600 transition-all hover:bg-slate-50 active:scale-95 shadow-sm">
-                <User size={14} className="text-indigo-600" />
-              </button>
-            </Tooltip>
+            <button onClick={() => onOpenModal('modalSettings')} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border border-slate-200 bg-white text-slate-600 transition-all hover:bg-slate-50 active:scale-95 shadow-sm text-xs font-semibold">
+              <Landmark size={14} className="text-blue-600" />
+              <span>Identitas Sekolah</span>
+            </button>
+            <button onClick={() => onOpenDataModal('pegawai')} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border border-slate-200 bg-white text-slate-600 transition-all hover:bg-slate-50 active:scale-95 shadow-sm text-xs font-semibold">
+              <Users size={14} className="text-emerald-600" />
+              <span>Data Pegawai</span>
+            </button>
+            <button onClick={() => onOpenDataModal('murid')} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border border-slate-200 bg-white text-slate-600 transition-all hover:bg-slate-50 active:scale-95 shadow-sm text-xs font-semibold">
+              <User size={14} className="text-indigo-600" />
+              <span>Data Murid</span>
+            </button>
+            <button onClick={() => onOpenModal('modalLibur')} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border border-slate-200 bg-white text-slate-600 transition-all hover:bg-slate-50 active:scale-95 shadow-sm text-xs font-semibold ml-1">
+              <CalendarDays size={14} className="text-orange-500" />
+              <span>Hari Libur</span>
+            </button>
 
             {/* Global Date Options */}
             <Tooltip content="Tahun Ajaran">
@@ -156,12 +154,6 @@ export const Topbar: React.FC<TopbarProps> = ({ onOpenModal, onOpenDataModal, on
                   {bNames.map((name, i) => <option key={i} value={i}>{name}</option>)}
                 </select>
               </div>
-            </Tooltip>
-
-            <Tooltip content="Hari Libur">
-              <button onClick={() => onOpenModal('modalLibur')} className="flex items-center justify-center p-1.5 rounded-md border border-slate-200 bg-white text-slate-600 transition-all hover:bg-slate-50 active:scale-95 shadow-sm ml-1">
-                <CalendarDays size={14} className="text-orange-500" />
-              </button>
             </Tooltip>
 
             <div className="flex-grow"></div>
